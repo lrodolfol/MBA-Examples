@@ -3,54 +3,14 @@ using MySqlConnector;
 
 namespace Core.DAL;
 
-public class AssetsDal : IAssetsDal
+public class AssetsMysqlDal : MysqlAbstraction,  IAssetsDal
 {
-    private string Server { get; set; } = null!;
-    private string UserName { get; set; } = null!;
-    private string Password { get; set; } = null!;
-    private string DatabaseName { get; set; } = null!;
-    private int Port { get; set; }
-    private const string TableName = "Assets";
-
-    private MySqlConnectionStringBuilder _connectionBuilder = null!;
-
-    public AssetsDal(string server, string userName, string password, string databaseName, int port)
+    public AssetsMysqlDal(string server, string userName, string password, string databaseName, int port) 
+        : base(server, userName, password, databaseName, port)
     {
-        Server = server;
-        UserName = userName;
-        Password = password;
-        DatabaseName = databaseName;
-        Port = port;
-
-        CheckConnectionStringEnvironment();
-
-        CreateConnectionString(password, databaseName);
+        TableName = "Assets";
     }
-
-    private void CheckConnectionStringEnvironment()
-    {
-        if (
-            string.IsNullOrWhiteSpace(Server) || string.IsNullOrWhiteSpace(UserName) ||
-            string.IsNullOrWhiteSpace(Password)
-            || string.IsNullOrWhiteSpace(DatabaseName) || Port <= 0
-        )
-        {
-            throw new ArgumentException("Environment for database connection is invalid");
-        }
-    }
-
-    private void CreateConnectionString(string password, string databaseName)
-    {
-        _connectionBuilder = new MySqlConnectionStringBuilder()
-        {
-            Server = Server,
-            UserID = UserName,
-            Password = password,
-            Database = databaseName,
-            Port = (uint)Port
-        };
-    }
-
+    
     public async Task<List<Assets>> GetAssetsAsync()
     {
         var assetsList = new List<Assets>();

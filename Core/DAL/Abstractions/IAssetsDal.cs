@@ -1,6 +1,6 @@
 ﻿namespace Core.DAL.Abstractions;
 
-public class IAssetsDAL
+public interface IAssetsDal
 {
-    
+    public Task<List<Assets>> GetAssetsAsync();
 }
