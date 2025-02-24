@@ -5,17 +5,17 @@ namespace EventsPublisher;
 
 public class AssetsServices
 {
-    public static async Task<List<Assets>> GetAssetsAsync()
-    {
-        var dal = new AssetsMysqlDal
-        (
-            "localhost",
-            "root",
-            "sinqia123",
-            "investment",
-            3306
+    private readonly MyConfigurations.MysqlConfiguration _mysqlEnvironments = MyConfigurations.MysqlEnvironment;
+    public async Task<List<Assets>> GetAssetsAsync()
+    {        
+        var dal = new AssetsMysqlDal(
+            _mysqlEnvironments.Host, 
+            _mysqlEnvironments.UserName, 
+            _mysqlEnvironments.Password, 
+            _mysqlEnvironments.Database, 
+            _mysqlEnvironments.Port    
         );
-
+        
         return await dal.GetAssetsAsync();
     }
 }

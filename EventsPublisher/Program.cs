@@ -5,16 +5,18 @@ using EventsPublisher;
 
 async Task<List<Operation>> CreateNewClientOperation()
 {
+    var clientServices = new ClientServices();
+    var assetsServices = new AssetsServices();
+    
     var rand  = new Random();
     if(rand.Next(0, 2) == 0)
-        await ClientServices.PersistClientsAsync(ClientServices.CreateMockClients());
+        await clientServices.PersistClientsAsync(clientServices.CreateMockClients());
     
-    var clients = await ClientServices.GetClientsAsync();
-    var assets = await AssetsServices.GetAssetsAsync();
+    var clients = await clientServices.GetClientsAsync();
+    var assets = await assetsServices.GetAssetsAsync();
     var operations = new List<Operation>();
     
     var randon = 0;
-    
     foreach (var client in clients)
     {
         randon = rand.Next(1, assets.Count);

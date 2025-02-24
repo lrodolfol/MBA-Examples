@@ -6,7 +6,8 @@ namespace EventsPublisher;
 
 public class ClientServices
 {
-    public static List<Client> CreateMockClients()
+    private readonly MyConfigurations.MysqlConfiguration _mysqlEnvironments = MyConfigurations.MysqlEnvironment;
+    public List<Client> CreateMockClients()
     {
         Console.WriteLine("Creating new client");
         var bogus = new Faker("pt-br");
@@ -24,20 +25,20 @@ public class ClientServices
         return clients;
     }
 
-    public static async Task PersistClientsAsync(List<Client> clients)
+    public async Task PersistClientsAsync(List<Client> clients)
     {
         var dal = new ClientsMysqlDal(
-            "localhost",
-            "root",
-            "sinqia123",
-            "investment",
-            3306
+            _mysqlEnvironments.Host, 
+            _mysqlEnvironments.UserName, 
+            _mysqlEnvironments.Password, 
+            _mysqlEnvironments.Database, 
+            _mysqlEnvironments.Port    
         );
     
         await dal.PersistClientsAsync(clients);
     }
 
-    public static async Task<List<Client>> GetClientsAsync()
+    public async Task<List<Client>> GetClientsAsync()
     {
         var dal = new ClientsMysqlDal(
             "localhost",
