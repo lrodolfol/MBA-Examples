@@ -23,21 +23,23 @@ public class ClientsDal : MysqlAbstraction, IClientDal
 
         try
         {
-            var query = $"INSET INTO {TableName} (Name) VALUES (@Name)";
+            var query = $"INSERT INTO {TableName} (Name) VALUES (@Name)";
             await using var command = new MySqlCommand(query, connection, transaction);
-        
+            
+            command.Parameters.Add("@Name", MySqlDbType.VarChar);
+            
             foreach (var client in clients)
             {
                 if(string.IsNullOrWhiteSpace(client.Name))
-                    continue;;
+                    continue;
             
-                command.Parameters.Add("@Name", MySqlDbType.VarChar).Value = client.Name;
+                command.Parameters["@Name"].Value = client.Name;
                 await command.ExecuteNonQueryAsync();
             }
         
             await transaction.CommitAsync();
         }
-        catch
+        catch(Exception e)
         {
             await transaction.RollbackAsync();
         }

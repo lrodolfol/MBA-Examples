@@ -11,14 +11,13 @@ public class ClientServices
     public List<Client> CreateMockClients()
     {
         Console.WriteLine("Creating new client");
-        var bogus = new Faker("pt-br");
-    
+        
         var cont = new Random().Next(10, 100);
         var clients = new List<Client>();
     
         do
         {
-            var clientName = bogus.Person.FullName;
+            var clientName = new Faker("pt_BR").Person.FullName;
             clients.Add(new Client(clientName));
             cont--;
         }while(cont > 0);
