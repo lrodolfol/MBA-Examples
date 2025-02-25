@@ -1,4 +1,4 @@
-﻿namespace EventsPublisher;
+﻿namespace Core.Configurations;
 
 public static class MyConfigurations
 {
@@ -11,7 +11,7 @@ public static class MyConfigurations
         var dataBaseHost = Environment.GetEnvironmentVariable("MYSQL-DATABASE-HOST") ?? "localhost";
         var dataBaseuserName = Environment.GetEnvironmentVariable("MYSQL-DATABASE-USERNAME") ?? "root";
         var dataBaseserPassword = Environment.GetEnvironmentVariable("MYSQL-DATABASE-PASSWORD") ?? "sinqia123";
-        var dataBaseName = Environment.GetEnvironmentVariable("MYSQL-DATABASE-NAME") ?? "investiment_simulator";
+        var dataBaseName = Environment.GetEnvironmentVariable("MYSQL-DATABASE-NAME") ?? "investment";
         var dataBasePort = Environment.GetEnvironmentVariable("MYSQL-DATABASE-PORT") ?? "3306";
         
         MysqlEnvironment.Host = dataBaseHost;

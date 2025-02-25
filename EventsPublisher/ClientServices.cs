@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using Core;
+using Core.Configurations;
 using Core.DAL.Mysql;
 
 namespace EventsPublisher;
