@@ -3,9 +3,9 @@
 public static class MyConfigurations
 {
     public static MysqlConfiguration MysqlEnvironment { get; set; } = new();
+    public static RabbitMqConfiguration RabbitMqEnvironment { get; set; } = new();
 
-    public static void LoadConfigurations() => LoadMysqlConfiguration();
-    
+    public static void LoadPropertiesFromEnvironmentVariables() => LoadMysqlConfiguration();
     private static void LoadMysqlConfiguration()
     {
         var dataBaseHost = Environment.GetEnvironmentVariable("MYSQL-DATABASE-HOST") ?? "localhost";
@@ -21,12 +21,23 @@ public static class MyConfigurations
         MysqlEnvironment.Port = Convert.ToInt16(dataBasePort);
     }
     
+    
+    
+    
     public class MysqlConfiguration
     {
         public string Host { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Database { get; set; } = string.Empty;
+        public int Port { get; set; }
+    }
+    public class RabbitMqConfiguration
+    {
+        public string Host { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string VirtualHost { get; set; } = string.Empty;
         public int Port { get; set; }
     }
 }

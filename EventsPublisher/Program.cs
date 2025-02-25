@@ -1,8 +1,19 @@
-﻿using Bogus;
-using Core;
-using Core.DAL;
-using EventsPublisher;
+﻿using Core;
+using Core.Configurations;
 using EventsPublisher.Services;
+using Microsoft.Extensions.Configuration;
+
+var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "dev";
+IConfigurationRoot configuration = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile($"appsettings.{environment}.json", false)
+    .Build();
+
+void StartConfigurations()
+{
+    MyConfigurations.LoadPropertiesFromEnvironmentVariables();
+    configuration.GetSection("messageBrockers:rabbitMq").Bind(MyConfigurations.RabbitMqEnvironment);
+}
 
 async Task<List<Operation>> CreateNewClientOperation()
 {
