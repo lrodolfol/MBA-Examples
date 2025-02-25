@@ -1,11 +1,11 @@
 ﻿using Core.DAL.Abstractions;
 using MySqlConnector;
 
-namespace Core.DAL;
+namespace Core.DAL.Mysql;
 
-public class AssetsMysqlDal : MysqlAbstraction,  IAssetsDal
+public class AssetsDal : MysqlAbstraction,  IAssetsDal
 {
-    public AssetsMysqlDal(string server, string userName, string password, string databaseName, int port) 
+    public AssetsDal(string server, string userName, string password, string databaseName, int port) 
         : base(server, userName, password, databaseName, port)
     {
         TableName = "Assets";

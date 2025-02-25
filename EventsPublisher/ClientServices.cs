@@ -1,6 +1,6 @@
 ﻿using Bogus;
 using Core;
-using Core.DAL;
+using Core.DAL.Mysql;
 
 namespace EventsPublisher;
 
@@ -27,7 +27,7 @@ public class ClientServices
 
     public async Task PersistClientsAsync(List<Client> clients)
     {
-        var dal = new ClientsMysqlDal(
+        var dal = new ClientsDal(
             _mysqlEnvironments.Host, 
             _mysqlEnvironments.UserName, 
             _mysqlEnvironments.Password, 
@@ -40,7 +40,7 @@ public class ClientServices
 
     public async Task<List<Client>> GetClientsAsync()
     {
-        var dal = new ClientsMysqlDal(
+        var dal = new ClientsDal(
             "localhost",
             "root",
             "sinqia123",

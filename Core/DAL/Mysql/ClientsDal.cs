@@ -1,11 +1,11 @@
 ﻿using Core.DAL.Abstractions;
 using MySqlConnector;
 
-namespace Core.DAL;
+namespace Core.DAL.Mysql;
 
-public class ClientsMysqlDal : MysqlAbstraction, IClientDal
+public class ClientsDal : MysqlAbstraction, IClientDal
 {
-    public ClientsMysqlDal(string server, string userName, string password, string databaseName, int port) 
+    public ClientsDal(string server, string userName, string password, string databaseName, int port) 
         : base(server, userName, password, databaseName, port)
     {
         TableName = "Clients";
