@@ -34,10 +34,10 @@ public static class MyConfigurations
     }
     public class RabbitMqConfiguration
     {
-        public string Host { get; set; } = string.Empty;
-        public string UserName { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public string VirtualHost { get; set; } = string.Empty;
-        public int Port { get; set; }
+        public string? Host { get; set; }
+        public string? UserName { get; set; }
+        public string? Password { get; set; }
+        public string? VirtualHost { get; set; }
+        public string? Port { get; set; }
     }
 }

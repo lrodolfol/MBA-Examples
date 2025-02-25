@@ -67,11 +67,11 @@ public class RabbitMqMessageBrocker : IMessageBrocker, IDisposable
     {
         _factory = new ConnectionFactory()
         {
-            HostName = _rabbitMqConfiguration.Host,
-            UserName = _rabbitMqConfiguration.UserName,
-            Password = _rabbitMqConfiguration.Password,
-            Port = _rabbitMqConfiguration.Port,
-            VirtualHost = _rabbitMqConfiguration.VirtualHost,
+            HostName = _rabbitMqConfiguration.Host ?? "localhost",
+            UserName = _rabbitMqConfiguration.UserName ?? "sinqia",
+            Password = _rabbitMqConfiguration.Password ?? "sinqia123",
+            Port = Convert.ToInt16(_rabbitMqConfiguration.Port ?? "5672"),
+            VirtualHost = _rabbitMqConfiguration.VirtualHost ?? "/",
         };
     }
 
