@@ -2,7 +2,7 @@
 using Core.Configurations;
 using Core.DAL.Mysql;
 
-namespace EventsPublisher;
+namespace EventsPublisher.Services;
 
 public class AssetsServices
 {

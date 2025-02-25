@@ -2,6 +2,7 @@
 using Core;
 using Core.DAL;
 using EventsPublisher;
+using EventsPublisher.Services;
 
 async Task<List<Operation>> CreateNewClientOperation()
 {
