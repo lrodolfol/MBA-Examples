@@ -1,4 +1,5 @@
-﻿using Core.DAL.Abstractions;
+﻿using System.Threading.Channels;
+using Core.DAL.Abstractions;
 using MySqlConnector;
 
 namespace Core.DAL.Mysql;
@@ -50,7 +51,7 @@ public class ClientsDal : MysqlAbstraction, IClientDal
         var clientList = new List<Client>();
 
         await using var connection = new MySqlConnection(_connectionBuilder.ConnectionString);
-
+        
         await connection.OpenAsync();
 
         var query = $"SELECT Id, Name FROM {DatabaseName}.{TableName}";

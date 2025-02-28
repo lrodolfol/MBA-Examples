@@ -8,11 +8,11 @@ public static class MyConfigurations
     public static void LoadPropertiesFromEnvironmentVariables() => LoadMysqlConfiguration();
     private static void LoadMysqlConfiguration()
     {
-        var dataBaseHost = Environment.GetEnvironmentVariable("MYSQL-DATABASE-HOST") ?? "localhost";
-        var dataBaseuserName = Environment.GetEnvironmentVariable("MYSQL-DATABASE-USERNAME") ?? "root";
-        var dataBaseserPassword = Environment.GetEnvironmentVariable("MYSQL-DATABASE-PASSWORD") ?? "sinqia123";
-        var dataBaseName = Environment.GetEnvironmentVariable("MYSQL-DATABASE-NAME") ?? "investment";
-        var dataBasePort = Environment.GetEnvironmentVariable("MYSQL-DATABASE-PORT") ?? "3306";
+        var dataBaseHost = Environment.GetEnvironmentVariable("MYSQL_DATABASE_HOST") ?? "localhostteste";
+        var dataBaseuserName = Environment.GetEnvironmentVariable("MYSQL_DATABASE_USERNAME") ?? "root";
+        var dataBaseserPassword = Environment.GetEnvironmentVariable("MYSQL_DATABASE_PASSWORD") ?? "sinqia123";
+        var dataBaseName = Environment.GetEnvironmentVariable("MYSQL_DATABASE_NAME") ?? "investment";
+        var dataBasePort = Environment.GetEnvironmentVariable("MYSQL_DATABASE_PORT") ?? "3306";
         
         MysqlEnvironment.Host = dataBaseHost;
         MysqlEnvironment.UserName = dataBaseuserName;

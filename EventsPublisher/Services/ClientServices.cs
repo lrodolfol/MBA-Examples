@@ -2,16 +2,19 @@
 using Core;
 using Core.Configurations;
 using Core.DAL.Mysql;
+using Microsoft.Extensions.Logging;
 
 namespace EventsPublisher.Services;
 
 public class ClientServices
 {
     private readonly MyConfigurations.MysqlConfiguration _mysqlEnvironments = MyConfigurations.MysqlEnvironment;
+    private readonly ILogger<ClientServices> _logger;
+
+    public ClientServices(ILogger<ClientServices> logger) => _logger = logger;
+
     public List<Client> CreateMockClients()
     {
-        Console.WriteLine("Creating new client");
-        
         var cont = new Random().Next(10, 100);
         var clients = new List<Client>();
     
@@ -36,16 +39,17 @@ public class ClientServices
         );
     
         await dal.PersistClientsAsync(clients);
+        _logger.LogInformation($"{clients.Count} clients have been persisted.");
     }
 
     public async Task<List<Client>> GetClientsAsync()
     {
         var dal = new ClientsDal(
-            "localhost",
-            "root",
-            "sinqia123",
-            "investment",
-            3306
+            _mysqlEnvironments.Host, 
+            _mysqlEnvironments.UserName, 
+            _mysqlEnvironments.Password, 
+            _mysqlEnvironments.Database, 
+            _mysqlEnvironments.Port    
         );
     
         return await dal.GetClientsAsync();

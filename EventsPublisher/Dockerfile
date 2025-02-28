@@ -9,6 +9,7 @@ COPY ["EventsPublisher/EventsPublisher.csproj", "EventsPublisher/"]
 COPY ["Core/Core.csproj", "Core/"]
 RUN dotnet restore "EventsPublisher/EventsPublisher.csproj"
 COPY . .
+
 WORKDIR "/src/EventsPublisher"
 RUN dotnet build "EventsPublisher.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
@@ -19,4 +20,5 @@ RUN dotnet publish "EventsPublisher.csproj" -c $BUILD_CONFIGURATION -o /app/publ
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
 ENTRYPOINT ["dotnet", "EventsPublisher.dll"]

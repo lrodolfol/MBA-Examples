@@ -5,6 +5,8 @@ using Core.Configurations;
 using EventsPublisher;
 using EventsPublisher.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "dev";
 IConfigurationRoot configuration = new ConfigurationBuilder()
@@ -12,17 +14,26 @@ IConfigurationRoot configuration = new ConfigurationBuilder()
     .AddJsonFile($"appsettings.{environment}.json", false)
     .Build();
 
+var serviceCollection = new ServiceCollection();
+serviceCollection.AddLogging(configure => configure.AddConsole())
+    .Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Information);
+
 MyConfigurations.LoadPropertiesFromEnvironmentVariables();
 configuration.GetSection("messageBrockers:rabbitMq").Bind(MyConfigurations.RabbitMqEnvironment);
 
-var operations = await CreateNewClientOperation();
-IMessageBrocker messageBrocker = new RabbitMqMessageBrocker();
-
-foreach (var operation in operations)
+do
 {
-    var operationsByteFormated = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(operation));
-    await messageBrocker.PublishAsync(operationsByteFormated);    
-}
+    var operations = await CreateNewClientOperation();
+    IMessageBrocker messageBrocker = new RabbitMqMessageBrocker();
+
+    foreach (var operation in operations)
+    {
+        var operationsByteFormated = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(operation));
+        await messageBrocker.PublishAsync(operationsByteFormated);    
+    }
+
+    Thread.Sleep(300000);
+} while (true);
 
 async Task<List<Operation>> CreateNewClientOperation()
 {
@@ -36,7 +47,10 @@ async Task<List<Operation>> CreateNewClientOperation()
 
     var clients = await clientServices.GetClientsAsync();
     if (clients.Count <= 0)
-        return operations;
+    {
+        Console.WriteLine("No clients have been created still.");
+        return operations;   
+    }
     
     var assets = await assetsServices.GetAssetsAsync();
     var randon = 0;

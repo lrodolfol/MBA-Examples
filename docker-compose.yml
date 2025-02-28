@@ -1,0 +1,21 @@
+﻿networks:
+  dev_environment:
+    driver: bridge
+    external: true
+    # name: dev_environment  # <-- Nome fixo da rede
+    
+services:
+  eventspublisher:
+    image: eventspublisher
+    build:
+      context: .
+      dockerfile: EventsPublisher/Dockerfile
+    environment:
+        ASPNETCORE_ENVIRONMENT: uat
+        MYSQL_DATABASE_HOST: mysql-DEV
+        MYSQL_DATABASE_USERNAME: root
+        MYSQL_DATABASE_PASSWORD: sinqia123
+        MYSQL_DATABASE_NAME: investment
+        MYSQL_DATABASE_PORT: 3306
+    networks:
+      - dev_environment

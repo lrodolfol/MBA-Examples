@@ -59,12 +59,15 @@ public class RabbitMqMessageBrocker : IMessageBrocker, IDisposable
         {
             { "x-dead-letter-exchange", $"{_exchangeNameDeadLeattler}" },
             { "x-dead-letter-routing-key", _routingKey },
-            { "x-message-ttl", 600000 },
+            //{ "x-message-ttl", 600000 },
             { "x-queue-mode", "lazy"}
         };
     }
     private void CreateFactory()
     {
+        Console.WriteLine(_rabbitMqConfiguration.Host);
+        Console.WriteLine(_rabbitMqConfiguration.Port);
+        
         _factory = new ConnectionFactory()
         {
             HostName = _rabbitMqConfiguration.Host ?? "localhost",
