@@ -39,7 +39,11 @@ public class ClientServices
         );
     
         await dal.PersistClientsAsync(clients);
-        _logger.LogInformation($"{clients.Count} clients have been persisted.");
+        
+        if(! dal.ResultTaskDataBase.IsSuccess)
+            _logger.LogError("Error for persisti clientes -> {0}", dal.ResultTaskDataBase.ErrorMessage);
+        else
+            _logger.LogInformation("{0} clients have been persisted.", clients.Count);
     }
 
     public async Task<List<Client>> GetClientsAsync()
@@ -52,6 +56,10 @@ public class ClientServices
             _mysqlEnvironments.Port    
         );
     
-        return await dal.GetClientsAsync();
+        var clients = await dal.GetClientsAsync();
+        if(!dal.ResultTaskDataBase.IsSuccess)
+            _logger.LogError("Error for get clients -> {0}", dal.ResultTaskDataBase.ErrorMessage);
+        
+        return clients;
     }
 }

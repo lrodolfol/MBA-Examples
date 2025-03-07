@@ -6,6 +6,7 @@ namespace Core.DAL.Mysql;
 
 public class ClientsDal : MysqlAbstraction, IClientDal
 {
+    public ResultTaskDataBase ResultTaskDataBase { get; private set; } = new ResultTaskDataBase(true);
     public ClientsDal(string server, string userName, string password, string databaseName, int port) 
         : base(server, userName, password, databaseName, port)
     {
@@ -14,7 +15,7 @@ public class ClientsDal : MysqlAbstraction, IClientDal
     
     public async Task PersistClientsAsync(List<Client> clients)
     {
-        if (clients == null || clients.Count == 0)
+        if (clients.Count == 0)
             return;
         
         await using var connection = new MySqlConnection(_connectionBuilder.ConnectionString);
@@ -42,6 +43,7 @@ public class ClientsDal : MysqlAbstraction, IClientDal
         }
         catch(Exception e)
         {
+            ResultTaskDataBase.SetMessageError(e.Message);
             await transaction.RollbackAsync();
         }
     }
@@ -49,24 +51,30 @@ public class ClientsDal : MysqlAbstraction, IClientDal
     public async Task<List<Client>> GetClientsAsync(short limit = 100)
     {
         var clientList = new List<Client>();
-
         await using var connection = new MySqlConnection(_connectionBuilder.ConnectionString);
         
-        await connection.OpenAsync();
-
-        var query = $"SELECT Id, Name FROM {DatabaseName}.{TableName}";
-        await using var command = new MySqlCommand(query, connection);
-
-        await using var reader = await command.ExecuteReaderAsync();
-
-        if (!reader.HasRows)
-            return clientList;
-
-        while (await reader.ReadAsync())
+        try
         {
-            clientList.Add(new Client(
-                reader.GetInt32(0), reader.GetString(1))
-            );
+            await connection.OpenAsync();
+
+            var query = $"SELECT Id, Name FROM {DatabaseName}.{TableName} ORDER BY RAND() LIMIT {limit}";
+            await using var command = new MySqlCommand(query, connection);
+
+            await using var reader = await command.ExecuteReaderAsync();
+
+            if (!reader.HasRows)
+                return clientList;
+
+            while (await reader.ReadAsync())
+            {
+                clientList.Add(new Client(
+                    reader.GetInt32(0), reader.GetString(1))
+                );
+            }
+        }
+        catch (Exception e)
+        {
+            ResultTaskDataBase.SetMessageError(e.Message);
         }
         
         return clientList;

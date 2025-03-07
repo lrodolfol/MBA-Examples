@@ -5,6 +5,7 @@ namespace Core.DAL.Mysql;
 
 public class AssetsDal : MysqlAbstraction,  IAssetsDal
 {
+    public ResultTaskDataBase ResultTaskDataBase { get; private set; }  = new ResultTaskDataBase(true);
     public AssetsDal(string server, string userName, string password, string databaseName, int port) 
         : base(server, userName, password, databaseName, port)
     {
@@ -17,21 +18,27 @@ public class AssetsDal : MysqlAbstraction,  IAssetsDal
 
         await using var connection = new MySqlConnection(_connectionBuilder.ConnectionString);
 
-        await connection.OpenAsync();
-
-        var query = $"SELECT Id, Name FROM {DatabaseName}.{TableName}";
-        await using var command = new MySqlCommand(query, connection);
-
-        await using var reader = await command.ExecuteReaderAsync();
-
-        if (!reader.HasRows)
-            return assetsList;
-
-        while (await reader.ReadAsync())
+        try
         {
-            assetsList.Add(new Assets(
-                reader.GetInt32(0), reader.GetString(1))
-            );
+            await connection.OpenAsync();
+
+            var query = $"SELECT Id, Name FROM {DatabaseName}.{TableName}";
+            await using var command = new MySqlCommand(query, connection);
+
+            await using var reader = await command.ExecuteReaderAsync();
+
+            if (!reader.HasRows)
+                return assetsList;
+
+            while (await reader.ReadAsync())
+            {
+                assetsList.Add(new Assets(
+                    reader.GetInt32(0), reader.GetString(1))
+                );
+            }   
+        }catch(Exception e)
+        {
+            ResultTaskDataBase.SetMessageError(e.Message);
         }
         
         return assetsList;

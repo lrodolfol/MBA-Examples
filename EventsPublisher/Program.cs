@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Core;
 using Core.Configurations;
+using Core.DAL.Mysql;
 using EventsPublisher;
 using EventsPublisher.Services;
 using Microsoft.Extensions.Configuration;
@@ -14,12 +15,22 @@ IConfigurationRoot configuration = new ConfigurationBuilder()
     .AddJsonFile($"appsettings.{environment}.json", false)
     .Build();
 
-var serviceCollection = new ServiceCollection();
-serviceCollection.AddLogging(configure => configure.AddConsole())
-    .Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Information);
-
 MyConfigurations.LoadPropertiesFromEnvironmentVariables();
 configuration.GetSection("messageBrockers:rabbitMq").Bind(MyConfigurations.RabbitMqEnvironment);
+
+var serviceProvider = new ServiceCollection()
+    .AddLogging(config =>
+    {
+        config.AddConsole();
+        config.SetMinimumLevel(LogLevel.Information);
+    })
+    .AddTransient<ClientsDal>()
+    .AddTransient<ClientServices>()
+    .AddTransient<AssetsDal>()
+    .AddTransient<AssetsServices>()
+    .BuildServiceProvider();
+
+var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<Program>();
 
 do
 {
@@ -32,13 +43,15 @@ do
         await messageBrocker.PublishAsync(operationsByteFormated);    
     }
 
-    Thread.Sleep(300000);
+    logger.LogInformation($"{operations.Count} Operations have been published. Waiting 5 minutes to create new operations.");
+    Thread.Sleep(60000);
 } while (true);
 
 async Task<List<Operation>> CreateNewClientOperation()
 {
-    var clientServices = new ClientServices();
-    var assetsServices = new AssetsServices();
+    var clientServices = serviceProvider.GetRequiredService<ClientServices>();
+    var assetsServices = serviceProvider.GetRequiredService<AssetsServices>();
+    
     var operations = new List<Operation>();
     
     var rand = new Random();
@@ -48,7 +61,7 @@ async Task<List<Operation>> CreateNewClientOperation()
     var clients = await clientServices.GetClientsAsync();
     if (clients.Count <= 0)
     {
-        Console.WriteLine("No clients have been created still.");
+        logger.LogWarning("No clients have been created still.");
         return operations;   
     }
     
