@@ -1,16 +1,15 @@
-﻿using Core.Configurations;
+﻿using System.Text;
+using System.Text.Json;
+using Core;
+using Core.Configurations;
+using Core.Models;
 using RabbitMQ.Client;
 
 namespace EventsPublisher;
 
-public class RabbitMqMessageBrocker : IMessageBrocker, IDisposable
+public class RabbitMqMessageBrocker<T> : IMessageBrocker, IDisposable where T : EventMessage
 {
-    private readonly string _exchangeName = "publisher-events-exchange";
-    private readonly string _queueName = "publisher-events-queue";
-    private readonly string _routingKey = "events";
-    
-    private readonly string _exchangeNameDeadLeattler = $"publisher-events-exchange-dead-leattler";
-    private readonly string _queueNameDeadLeattler  = "publisher-events-queue-dead-leattler";
+    private T _modelMessage;
     
     private readonly IConnection _connection;
     private readonly IChannel _chanel;
@@ -21,8 +20,12 @@ public class RabbitMqMessageBrocker : IMessageBrocker, IDisposable
     private ConnectionFactory _factory = null!;
     private Dictionary<string, object>? _queueArguments;
 
-    public RabbitMqMessageBrocker()
+    public ResultTasks ResultTasks = new ResultTasks(true);
+    
+    public RabbitMqMessageBrocker(T modelMessage)
     {
+        _modelMessage = modelMessage;
+        
         CreateFactory();
         
         _connection = _factory.CreateConnectionAsync().Result;
@@ -30,35 +33,72 @@ public class RabbitMqMessageBrocker : IMessageBrocker, IDisposable
         
         LoadQueueArguments();
     }
-    public async Task PublishAsync(byte[] bodyJsonMessage)
+    public async Task PublishAsync()
     {
-        if (bodyJsonMessage.Length == 0)
-            return;
-        
-        await _chanel.ExchangeDeclareAsync(
-            _exchangeNameDeadLeattler, ExchangeType.Topic, true, false
+        await _chanel.BasicPublishAsync(_modelMessage.Exchange, _modelMessage.RoutingKey,_modelMessage.BodyMessage);
+    }
+
+    public async Task<bool> PreparePublish(Object message)
+    {
+        try
+        {
+            _modelMessage.BodyMessage = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
+            
+            await _chanel.ExchangeDeclareAsync(
+                _modelMessage.ExchangeDeadLeatter, 
+                ExchangeType.Topic, 
+                _modelMessage.Durable, 
+                _modelMessage.AutoDelete
             );
-        QueueDeclareOk queueDeclareOkDeadLeatter = await _chanel.QueueDeclareAsync(
-            _queueNameDeadLeattler, true, false, false
+            
+            QueueDeclareOk queueDeclareOkDeadLeatter = await _chanel.QueueDeclareAsync(
+                _modelMessage.QueueDeadLeatter, 
+                _modelMessage.Durable, 
+                _modelMessage.Exclusive, 
+                _modelMessage.AutoDelete
             );
-        await _chanel.QueueBindAsync(queueDeclareOkDeadLeatter.QueueName, _exchangeNameDeadLeattler, _routingKey);
-        
-        await _chanel.ExchangeDeclareAsync(_exchangeName, ExchangeType.Topic, true, false);
-        QueueDeclareOk queueDeclareOk = await _chanel.QueueDeclareAsync(
-            _queueName, true, false, false, _queueArguments!
+            
+            await _chanel.QueueBindAsync(
+                queueDeclareOkDeadLeatter.QueueName, 
+                _modelMessage.ExchangeDeadLeatter, 
+                _modelMessage.RoutingKey
             );
         
-        await _chanel.QueueBindAsync(queueDeclareOk.QueueName, _exchangeName, _routingKey);
+            await _chanel.ExchangeDeclareAsync(
+                _modelMessage.Exchange, 
+                ExchangeType.Topic, 
+                _modelMessage.Durable, 
+                _modelMessage.AutoDelete
+            );
+            
+            QueueDeclareOk queueDeclareOk = await _chanel.QueueDeclareAsync(
+                _modelMessage.Queue, 
+                _modelMessage.Durable, 
+                _modelMessage.Exclusive, 
+                _modelMessage.AutoDelete, 
+                _queueArguments!
+            );
         
-        await _chanel.BasicPublishAsync(_exchangeName, _routingKey, bodyJsonMessage);
+            await _chanel.QueueBindAsync(
+                queueDeclareOk.QueueName, 
+                _modelMessage.Exchange, 
+                _modelMessage.RoutingKey
+            );   
+        }catch(Exception e)
+        {
+            ResultTasks.SetMessageError(e.Message);
+            return false;
+        }
+        
+        return true;
     }
 
     private void LoadQueueArguments()
     {
         _queueArguments = new Dictionary<string, object>
         {
-            { "x-dead-letter-exchange", $"{_exchangeNameDeadLeattler}" },
-            { "x-dead-letter-routing-key", _routingKey },
+            { "x-dead-letter-exchange", $"{_modelMessage.ExchangeDeadLeatter}" },
+            { "x-dead-letter-routing-key", _modelMessage.RoutingKey },
             { "x-message-ttl", 600000 },
             { "x-queue-mode", "lazy"}
         };

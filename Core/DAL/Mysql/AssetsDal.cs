@@ -1,11 +1,13 @@
 ﻿using Core.DAL.Abstractions;
+using Core.Models;
+using Core.Models.Entities;
 using MySqlConnector;
 
 namespace Core.DAL.Mysql;
 
 public class AssetsDal : MysqlAbstraction,  IAssetsDal
 {
-    public ResultTaskDataBase ResultTaskDataBase { get; private set; }  = new ResultTaskDataBase(true);
+    public ResultTasks ResultTasks { get; private set; }  = new ResultTasks(true);
     public AssetsDal(string server, string userName, string password, string databaseName, int port) 
         : base(server, userName, password, databaseName, port)
     {
@@ -38,7 +40,7 @@ public class AssetsDal : MysqlAbstraction,  IAssetsDal
             }   
         }catch(Exception e)
         {
-            ResultTaskDataBase.SetMessageError(e.Message);
+            ResultTasks.SetMessageError(e.Message);
         }
         
         return assetsList;

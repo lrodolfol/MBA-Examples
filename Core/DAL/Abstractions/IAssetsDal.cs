@@ -1,4 +1,6 @@
-﻿namespace Core.DAL.Abstractions;
+﻿using Core.Models.Entities;
+
+namespace Core.DAL.Abstractions;
 
 public interface IAssetsDal
 {

@@ -1,12 +1,14 @@
 ﻿using System.Threading.Channels;
 using Core.DAL.Abstractions;
+using Core.Models;
+using Core.Models.Entities;
 using MySqlConnector;
 
 namespace Core.DAL.Mysql;
 
 public class ClientsDal : MysqlAbstraction, IClientDal
 {
-    public ResultTaskDataBase ResultTaskDataBase { get; private set; } = new ResultTaskDataBase(true);
+    public ResultTasks ResultTasks { get; private set; } = new ResultTasks(true);
     public ClientsDal(string server, string userName, string password, string databaseName, int port) 
         : base(server, userName, password, databaseName, port)
     {
@@ -43,7 +45,7 @@ public class ClientsDal : MysqlAbstraction, IClientDal
         }
         catch(Exception e)
         {
-            ResultTaskDataBase.SetMessageError(e.Message);
+            ResultTasks.SetMessageError(e.Message);
             await transaction.RollbackAsync();
         }
     }
@@ -74,7 +76,7 @@ public class ClientsDal : MysqlAbstraction, IClientDal
         }
         catch (Exception e)
         {
-            ResultTaskDataBase.SetMessageError(e.Message);
+            ResultTasks.SetMessageError(e.Message);
         }
         
         return clientList;

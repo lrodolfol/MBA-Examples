@@ -2,5 +2,6 @@
 
 public interface IMessageBrocker
 {
-    public Task PublishAsync(byte[] bodyJsonMessage);
+    public Task PublishAsync();
+    public Task<bool> PreparePublish(Object message);
 }

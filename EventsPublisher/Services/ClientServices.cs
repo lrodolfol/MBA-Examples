@@ -2,6 +2,7 @@
 using Core;
 using Core.Configurations;
 using Core.DAL.Mysql;
+using Core.Models.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace EventsPublisher.Services;
@@ -40,8 +41,8 @@ public class ClientServices
     
         await dal.PersistClientsAsync(clients);
         
-        if(! dal.ResultTaskDataBase.IsSuccess)
-            _logger.LogError("Error for persisti clientes -> {0}", dal.ResultTaskDataBase.ErrorMessage);
+        if(! dal.ResultTasks.IsSuccess)
+            _logger.LogError("Error for persisti clientes -> {0}", dal.ResultTasks.ErrorMessage);
         else
             _logger.LogInformation("{0} clients have been persisted.", clients.Count);
     }
@@ -57,8 +58,8 @@ public class ClientServices
         );
     
         var clients = await dal.GetClientsAsync();
-        if(!dal.ResultTaskDataBase.IsSuccess)
-            _logger.LogError("Error for get clients -> {0}", dal.ResultTaskDataBase.ErrorMessage);
+        if(!dal.ResultTasks.IsSuccess)
+            _logger.LogError("Error for get clients -> {0}", dal.ResultTasks.ErrorMessage);
         
         return clients;
     }

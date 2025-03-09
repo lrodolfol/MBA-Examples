@@ -3,6 +3,8 @@ using System.Text.Json;
 using Core;
 using Core.Configurations;
 using Core.DAL.Mysql;
+using Core.Models.Agregates;
+using Core.Models.Enums;
 using EventsPublisher;
 using EventsPublisher.Services;
 using Microsoft.Extensions.Configuration;
@@ -35,12 +37,19 @@ var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<P
 do
 {
     var operations = await CreateNewClientOperation();
-    IMessageBrocker messageBrocker = new RabbitMqMessageBrocker();
+
+    var tradeMessage = new TradeMessage();
+    IMessageBrocker messageBrocker = new RabbitMqMessageBrocker<TradeMessage>(tradeMessage);
 
     foreach (var operation in operations)
     {
-        var operationsByteFormated = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(operation));
-        await messageBrocker.PublishAsync(operationsByteFormated);    
+        if (!await messageBrocker.PreparePublish(operation))
+        {
+            logger.LogError("The message brocker had a failure to publish the message.");
+            continue;
+        }
+        
+        await messageBrocker.PublishAsync();
     }
 
     logger.LogInformation($"{operations.Count} Operations have been published. Waiting 5 minutes to create new operations.");

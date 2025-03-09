@@ -1,4 +1,6 @@
-﻿namespace Core;
+﻿using Core.Models.Enums;
+
+namespace Core.Models.Agregates;
 
 public struct Operation
 {

@@ -1,6 +1,7 @@
 ﻿using Core;
 using Core.Configurations;
 using Core.DAL.Mysql;
+using Core.Models.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace EventsPublisher.Services;
@@ -23,8 +24,8 @@ public class AssetsServices
         );
         
         var assets = await dal.GetAssetsAsync();
-        if(! dal.ResultTaskDataBase.IsSuccess)
-            _logger.LogError("Error for get assets -> {0}", dal.ResultTaskDataBase.ErrorMessage);
+        if(! dal.ResultTasks.IsSuccess)
+            _logger.LogError("Error for get assets -> {0}", dal.ResultTasks.ErrorMessage);
         
         return assets;
     }
