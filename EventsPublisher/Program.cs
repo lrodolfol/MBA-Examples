@@ -1,12 +1,11 @@
-﻿using System.Text;
-using System.Text.Json;
-using Core;
-using Core.Configurations;
+﻿using Core.Configurations;
 using Core.DAL.Mysql;
 using Core.Models.Agregates;
 using Core.Models.Enums;
 using EventsPublisher;
-using EventsPublisher.Services;
+using EventsPublisher.InfraServices;
+using EventsPublisher.Models;
+using EventsPublisher.ModelServices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -20,7 +19,7 @@ IConfigurationRoot configuration = new ConfigurationBuilder()
 MyConfigurations.LoadPropertiesFromEnvironmentVariables();
 configuration.GetSection("messageBrockers:rabbitMq").Bind(MyConfigurations.RabbitMqEnvironment);
 
-var serviceProvider = new ServiceCollection()
+ServiceProvider serviceProvider = new ServiceCollection()
     .AddLogging(config =>
     {
         config.AddConsole();
@@ -46,6 +45,7 @@ do
         if (!await messageBrocker.PreparePublish(operation))
         {
             logger.LogError("The message brocker had a failure to publish the message.");
+            //UseInboxMessage(operation);
             continue;
         }
         

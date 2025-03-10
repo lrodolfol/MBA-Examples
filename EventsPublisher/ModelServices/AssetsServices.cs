@@ -1,10 +1,9 @@
-﻿using Core;
-using Core.Configurations;
+﻿using Core.Configurations;
 using Core.DAL.Mysql;
 using Core.Models.Entities;
 using Microsoft.Extensions.Logging;
 
-namespace EventsPublisher.Services;
+namespace EventsPublisher.ModelServices;
 
 public class AssetsServices
 {

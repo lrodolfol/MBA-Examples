@@ -1,4 +1,4 @@
-﻿namespace EventsPublisher;
+﻿namespace EventsPublisher.InfraServices;
 
 public interface IMessageBrocker
 {

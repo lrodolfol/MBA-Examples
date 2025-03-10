@@ -1,4 +1,4 @@
-﻿namespace EventsPublisher;
+﻿namespace EventsPublisher.Models;
 
 public class TradeMessage : EventMessage
 {

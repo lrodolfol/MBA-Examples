@@ -1,11 +1,11 @@
 ﻿using System.Text;
 using System.Text.Json;
-using Core;
 using Core.Configurations;
 using Core.Models;
+using EventsPublisher.Models;
 using RabbitMQ.Client;
 
-namespace EventsPublisher;
+namespace EventsPublisher.InfraServices;
 
 public class RabbitMqMessageBrocker<T> : IMessageBrocker, IDisposable where T : EventMessage
 {
