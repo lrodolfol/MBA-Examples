@@ -1,4 +1,5 @@
-﻿using Core.Configurations;
+﻿using System.Text.Json;
+using Core.Configurations;
 using Core.DAL.Mysql;
 using Core.Models.Agregates;
 using Core.Models.Enums;
@@ -37,14 +38,19 @@ do
 {
     var operations = await CreateNewClientOperation();
 
+    var cacheService = new RedisDataCaching();
+    
     var tradeMessage = new TradeMessage();
+    var tasksMessageToCache = new List<Task>();
     IMessageBrocker messageBrocker = new RabbitMqMessageBrocker<TradeMessage>(tradeMessage);
-
+    
     foreach (var operation in operations)
     {
-        if (!await messageBrocker.PreparePublish(operation))
+        var messageJsonFormated = JsonSerializer.Serialize(operation);
+        if (!await messageBrocker.PreparePublish(messageJsonFormated))
         {
-            logger.LogError("The message brocker had a failure to publish the message.");
+            logger.LogError("The message brocker had a failure to publish the message. The massage will be added to the cache.");
+            tasksMessageToCache.Add(cacheService.AddToListAsync(configuration["caching:keysNames:tradesMessageWithError"]!, messageJsonFormated));
             //UseInboxMessage(operation);
             continue;
         }
@@ -52,6 +58,9 @@ do
         await messageBrocker.PublishAsync();
     }
 
+    if(tasksMessageToCache.Count > 0)
+        await Task.WhenAll(tasksMessageToCache);
+    
     logger.LogInformation($"{operations.Count} Operations have been published. Waiting 5 minutes to create new operations.");
     Thread.Sleep(60000);
 } while (true);

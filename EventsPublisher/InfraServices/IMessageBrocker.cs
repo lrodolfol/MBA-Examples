@@ -3,5 +3,5 @@
 public interface IMessageBrocker
 {
     public Task PublishAsync();
-    public Task<bool> PreparePublish(Object message);
+    public Task<bool> PreparePublish(string messageJsonFormated);
 }

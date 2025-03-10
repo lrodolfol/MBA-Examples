@@ -38,16 +38,16 @@ public class RabbitMqMessageBrocker<T> : IMessageBrocker, IDisposable where T : 
         await _chanel.BasicPublishAsync(_modelMessage.Exchange, _modelMessage.RoutingKey,_modelMessage.BodyMessage);
     }
 
-    public async Task<bool> PreparePublish(Object message)
+    public async Task<bool> PreparePublish(string messageJsonFormated)
     {
         try
         {
-            _modelMessage.BodyMessage = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
+            _modelMessage.BodyMessage = Encoding.UTF8.GetBytes(messageJsonFormated);
             
             await _chanel.ExchangeDeclareAsync(
                 _modelMessage.ExchangeDeadLeatter, 
                 ExchangeType.Topic, 
-                _modelMessage.Durable, 
+                !_modelMessage.Durable, 
                 _modelMessage.AutoDelete
             );
             
