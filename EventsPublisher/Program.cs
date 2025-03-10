@@ -51,7 +51,7 @@ do
         {
             logger.LogError("The message brocker had a failure to publish the message. The massage will be added to the cache.");
             tasksMessageToCache.Add(cacheService.AddToListAsync(configuration["caching:keysNames:tradesMessageWithError"]!, messageJsonFormated));
-            //UseInboxMessage(operation);
+            
             continue;
         }
         
@@ -70,7 +70,7 @@ async Task<List<Operation>> CreateNewClientOperation()
     var clientServices = serviceProvider.GetRequiredService<ClientServices>();
     var assetsServices = serviceProvider.GetRequiredService<AssetsServices>();
     
-    var operations = new List<Operation>();
+    List<Operation> operations = new List<Operation>();
     
     var rand = new Random();
     if (rand.Next(1, 5) % 2 == 0)
@@ -98,7 +98,7 @@ async Task<List<Operation>> CreateNewClientOperation()
                 client.Id,
                 assets[randon].Id,
                 (ushort)amount,
-                randon % 2 == 0 ? OperationType.INPUT : OperationType.OUTPUT
+                randon % 2 == 0 ?  OperationType.INPUT : OperationType.OUTPUT
             )
         );
     }

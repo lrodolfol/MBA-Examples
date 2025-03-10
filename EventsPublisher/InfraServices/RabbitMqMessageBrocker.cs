@@ -47,7 +47,7 @@ public class RabbitMqMessageBrocker<T> : IMessageBrocker, IDisposable where T : 
             await _chanel.ExchangeDeclareAsync(
                 _modelMessage.ExchangeDeadLeatter, 
                 ExchangeType.Topic, 
-                !_modelMessage.Durable, 
+                _modelMessage.Durable, 
                 _modelMessage.AutoDelete
             );
             
