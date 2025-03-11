@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Text.Json;
 using Core.Configurations;
 using Core.Models;
 using EventsPublisher.Models;
