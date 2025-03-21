@@ -13,22 +13,22 @@ public class ClientServices
 
     public ClientServices(ILogger<ClientServices> logger) => _logger = logger;
 
-    public List<Client> CreateMockClients()
+    public List<Clients> CreateMockClients()
     {
         var cont = new Random().Next(10, 100);
-        var clients = new List<Client>();
+        var clients = new List<Clients>();
     
         do
         {
             var clientName = new Faker("pt_BR").Person.FullName;
-            clients.Add(new Client(clientName));
+            clients.Add(new Clients(clientName));
             cont--;
         }while(cont > 0);
     
         return clients;
     }
 
-    public async Task PersistClientsAsync(List<Client> clients)
+    public async Task PersistClientsAsync(List<Clients> clients)
     {
         var dal = new ClientsDal(
             _mysqlEnvironments.Host, 
@@ -46,7 +46,7 @@ public class ClientServices
             _logger.LogInformation("{0} clients have been persisted.", clients.Count);
     }
 
-    public async Task<List<Client>> GetClientsAsync()
+    public async Task<List<Clients>> GetClientsAsync()
     {
         var dal = new ClientsDal(
             _mysqlEnvironments.Host, 

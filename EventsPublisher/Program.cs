@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using Core.Configurations;
 using Core.DAL.Mysql;
-using Core.Models.Agregates;
 using Core.Models.Enums;
+using Core.Models.Events;
 using EventsPublisher;
 using EventsPublisher.InfraServices;
 using EventsPublisher.Models;
@@ -44,7 +44,7 @@ do
     var tasksMessageToCache = new List<Task>();
     IMessageBrocker messageBrocker = new RabbitMqMessageBrocker<TradeMessage>(tradeMessage);
     
-    foreach (var operation in operations)
+    foreach (OperationCreated operation in operations)
     {
         var messageJsonFormated = JsonSerializer.Serialize(operation);
         if (!await messageBrocker.PreparePublish(messageJsonFormated))
@@ -62,15 +62,15 @@ do
         await Task.WhenAll(tasksMessageToCache);
     
     logger.LogInformation($"{operations.Count} Operations have been published. Waiting 5 minutes to create new operations.");
-    Thread.Sleep(60000);
+    Thread.Sleep(1000);
 } while (true);
 
-async Task<List<Operation>> CreateNewClientOperation()
+async Task<List<OperationCreated>> CreateNewClientOperation()
 {
     var clientServices = serviceProvider.GetRequiredService<ClientServices>();
     var assetsServices = serviceProvider.GetRequiredService<AssetsServices>();
     
-    List<Operation> operations = new List<Operation>();
+    List<OperationCreated> operations = new List<OperationCreated>();
     
     var rand = new Random();
     if (rand.Next(1, 5) % 2 == 0)
@@ -93,7 +93,7 @@ async Task<List<Operation>> CreateNewClientOperation()
 
         operations.Add
         (
-            new Operation
+            new OperationCreated
             (
                 client.Id,
                 assets[randon].Id,

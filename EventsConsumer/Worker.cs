@@ -1,4 +1,8 @@
 using Core.Configurations;
+using Core.DAL.Mysql;
+using Core.Models.Entities;
+using Core.Models.Events;
+using EventsConsumer.Services;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -27,7 +31,7 @@ public class Worker : BackgroundService
         };
         _connection = _factory.CreateConnectionAsync().Result;
         _channel = _connection.CreateChannelAsync().Result;
-
+        _channel.BasicQosAsync(0, 5, false);
         _logger = logger;
     }
 
@@ -38,12 +42,7 @@ public class Worker : BackgroundService
             var eventingBasicConsumer = new AsyncEventingBasicConsumer(_channel);
             eventingBasicConsumer.ReceivedAsync += this.OnMessage;
 
-            _channel.BasicConsumeAsync("publisher-events-queue", false, eventingBasicConsumer); //mudar auto ack para false
-
-            if (_logger.IsEnabled(LogLevel.Information))
-            {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-            }
+            _channel.BasicConsumeAsync("publisher-events-queue", false, eventingBasicConsumer);
 
             await Task.Delay(1000, stoppingToken);
         }
@@ -51,18 +50,40 @@ public class Worker : BackgroundService
 
     private async Task OnMessage(object sender, BasicDeliverEventArgs eventArgs)
     {
-        var obj = eventArgs.Body.ToArray().ToUTF8String().Deserialize<object>();
-        Console.WriteLine($"Receives from routinkey '{eventArgs.RoutingKey}':  {obj}");
-        
-        await _channel.BasicAckAsync(eventArgs.DeliveryTag, false);
+        _ = Task.Run(async () =>
+        {
+            var operationCreated = eventArgs.Body.ToArray().ToUTF8String().Deserialize<OperationCreated>();
+
+            Console.WriteLine(
+                $"Receives from routinkey '{eventArgs.RoutingKey}':  {operationCreated} - ConsumerTag: {eventArgs.ConsumerTag}"
+            );
+
+            try
+            {
+                var operationsServices = new OperationsService(); //colocar como injeção de dependência
+                await operationsServices.ProcessOperationReceivedAsync(operationCreated);
+                
+                //chamar positionService e dentro dele ter um metodo para fazer upinsert
+                    //a query deve somar com o total ja exixtente para esse determinado dia
+                    //INSERT OR CREAT (....) on duplicate key update Amount = Amount + VALUES(Amount)
+                
+                await _channel.BasicAckAsync(eventArgs.DeliveryTag, false);
+                
+            }
+            catch (Exception ex)
+            {
+                await _channel.BasicNackAsync(eventArgs.DeliveryTag, multiple: false, requeue: true);
+            }
+        });
     }
 }
 
 //colocar dentro do core
 public static partial class Extensions
 {
-    public static string Serialize<T>(this T objectToSerialize) => System.Text.Json.JsonSerializer.Serialize<T>(objectToSerialize);
-        
+    public static string Serialize<T>(this T objectToSerialize) =>
+        System.Text.Json.JsonSerializer.Serialize<T>(objectToSerialize);
+
     public static T Deserialize<T>(this string jsonText) => System.Text.Json.JsonSerializer.Deserialize<T>(jsonText);
 
     public static byte[] ToByteArray(this string text) => System.Text.Encoding.UTF8.GetBytes(text);
@@ -70,7 +91,4 @@ public static partial class Extensions
     public static string ToUTF8String(this byte[] bytes) => System.Text.Encoding.UTF8.GetString(bytes);
 
     public static ReadOnlyMemory<byte> ToReadOnlyMemory(this byte[] bytes) => new ReadOnlyMemory<byte>(bytes);
-
-        
-
 }

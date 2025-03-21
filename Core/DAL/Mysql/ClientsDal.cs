@@ -15,7 +15,7 @@ public class ClientsDal : MysqlAbstraction, IClientDal
         TableName = "Clients";
     }
     
-    public async Task PersistClientsAsync(List<Client> clients)
+    public async Task PersistClientsAsync(List<Clients> clients)
     {
         if (clients.Count == 0)
             return;
@@ -50,9 +50,9 @@ public class ClientsDal : MysqlAbstraction, IClientDal
         }
     }
 
-    public async Task<List<Client>> GetClientsAsync(short limit = 100)
+    public async Task<List<Clients>> GetClientsAsync(short limit = 100)
     {
-        var clientList = new List<Client>();
+        var clientList = new List<Clients>();
         await using var connection = new MySqlConnection(_connectionBuilder.ConnectionString);
         
         try
@@ -69,7 +69,7 @@ public class ClientsDal : MysqlAbstraction, IClientDal
 
             while (await reader.ReadAsync())
             {
-                clientList.Add(new Client(
+                clientList.Add(new Clients(
                     reader.GetInt32(0), reader.GetString(1))
                 );
             }
