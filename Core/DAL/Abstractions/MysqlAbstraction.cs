@@ -1,9 +1,11 @@
-﻿using MySqlConnector;
+﻿using Core.Models;
+using MySqlConnector;
 
 namespace Core.DAL.Abstractions;
 
 public abstract class MysqlAbstraction
 {
+    public ResultTasks ResultTasks { get; private set; } = new ResultTasks(true);
     protected string Server { get; set; } = null!;
     protected string UserName { get; set; } = null!;
     protected string Password { get; set; } = null!;

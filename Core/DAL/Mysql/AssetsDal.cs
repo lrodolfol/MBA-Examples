@@ -7,7 +7,6 @@ namespace Core.DAL.Mysql;
 
 public class AssetsDal : MysqlAbstraction,  IAssetsDal
 {
-    public ResultTasks ResultTasks { get; private set; }  = new ResultTasks(true);
     public AssetsDal(string server, string userName, string password, string databaseName, int port) 
         : base(server, userName, password, databaseName, port)
     {

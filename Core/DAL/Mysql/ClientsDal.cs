@@ -8,7 +8,6 @@ namespace Core.DAL.Mysql;
 
 public class ClientsDal : MysqlAbstraction, IClientDal
 {
-    public ResultTasks ResultTasks { get; private set; } = new ResultTasks(true);
     public ClientsDal(string server, string userName, string password, string databaseName, int port) 
         : base(server, userName, password, databaseName, port)
     {

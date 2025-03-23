@@ -19,7 +19,13 @@ public class OperationsService
             _mysqlEnvironments.Port
         );
 
-        var clientOperations = await operationsDal.GetOperationsByClientAndAssetIdAsync(operationCreated.ClientId, operationCreated.AssetId);
+        var clientOperations = 
+            await operationsDal.GetOperationsByClientAndAssetIdAsync
+                (
+                    operationCreated.ClientId, 
+                    operationCreated.AssetId
+                );
+        
         var totalAmount = clientOperations.Sum(x => x.Amount);
         
         await operationsDal.CreateOperationAsync(
