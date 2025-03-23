@@ -24,7 +24,7 @@ public class PositionsDal : MysqlAbstraction
         {
             var query = @"INSERT INTO positions (client_id, asset_id, amount, date) 
                     VALUES (@ClientId, @AssetId, @Amount, @Date)
-                    ON DUPLICATE KEY UPDATE amount = @Amount, updated_at = @UpdatedAt";
+                    ON DUPLICATE KEY UPDATE amount = COALESCE(amount, 0) + (@Amount)";
             
             await using var command = new MySqlCommand(query, connection, transaction);
 
@@ -45,6 +45,7 @@ public class PositionsDal : MysqlAbstraction
         {
             ResultTasks.SetMessageError(e.Message);
             await transaction.RollbackAsync();
+            throw;
         }
     }
     

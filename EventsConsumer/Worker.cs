@@ -1,6 +1,7 @@
 using Core.Configurations;
 using Core.DAL.Mysql;
 using Core.Models.Entities;
+using Core.Models.Enums;
 using Core.Models.Events;
 using EventsConsumer.Services;
 using RabbitMQ.Client;
@@ -60,15 +61,25 @@ public class Worker : BackgroundService
 
             try
             {
+                //colocar UnitOfWork para todos processos.
+                
                 var operationsServices = new OperationsService(); //colocar como injeção de dependência
                 await operationsServices.ProcessOperationReceivedAsync(operationCreated);
                 
-                //chamar positionService e dentro dele ter um metodo para fazer upinsert
-                    //a query deve somar com o total ja exixtente para esse determinado dia
-                    //INSERT OR CREAT (....) on duplicate key update Amount = Amount + VALUES(Amount)
+                var positionsService = new PositionsService(); //colocar como injeção de dependência
+                var amoutConverted = operationCreated.OperationType == OperationType.INPUT
+                    ? operationCreated.Amount : operationCreated.Amount * -1;
+                
+                await positionsService.UpInsertPositionAsync(
+                    new Positions(
+                        operationCreated.ClientId, 
+                        operationCreated.AssetId, 
+                        (short)amoutConverted,
+                        DateOnly.FromDateTime(operationCreated.Moment.DateTime)
+                        )
+                    );
                 
                 await _channel.BasicAckAsync(eventArgs.DeliveryTag, false);
-                
             }
             catch (Exception ex)
             {

@@ -45,6 +45,7 @@ public class OperationsDal : MysqlAbstraction
         {
             ResultTasks.SetMessageError(e.Message);
             await transaction.RollbackAsync();
+            throw;
         }
     }
     
@@ -71,7 +72,7 @@ public class OperationsDal : MysqlAbstraction
                 var operation = new Operations(
                     (int)reader["clientId"],
                     (int)reader["assetsId"],
-                    (ushort)reader["amount"],
+                    (short)reader["amount"],
                     DateOnly.FromDateTime(DateTime.Parse(reader["DateOperation"].ToString()!))
                     );
                 operations.Add(operation);
@@ -82,6 +83,7 @@ public class OperationsDal : MysqlAbstraction
         catch(Exception e)
         {
             ResultTasks.SetMessageError(e.Message);
+            throw;
         }
         
         return operations;

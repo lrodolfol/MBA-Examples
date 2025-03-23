@@ -27,5 +27,5 @@ public class Positions : BaseEntity
         UpdatedAt = updatedAt;
     }
 
-    public string ToString() => $"ClientId: {ClientId}, AssetId: {AssetId}, Amount: {Amount}, Date: {Date}";
+    public override string ToString() => $"ClientId: {ClientId}, AssetId: {AssetId}, Amount: {Amount}, Date: {Date}";
 }
