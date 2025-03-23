@@ -4,10 +4,10 @@ public class Operations : BaseEntity
 {
     public int ClientId { get; private set; }
     public int AssetId { get; private set; }
-    public ushort Amount { get; private set; }
+    public short Amount { get; private set; }
     public DateOnly DateOperation { get; private set; }
 
-    public Operations(int clientId, int assetId, ushort amount, DateOnly dateOperation)
+    public Operations(int clientId, int assetId, short amount, DateOnly dateOperation)
     {
         ClientId = clientId;
         AssetId = assetId;
