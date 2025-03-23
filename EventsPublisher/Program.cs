@@ -97,7 +97,7 @@ async Task<List<OperationCreated>> CreateNewClientOperation()
             (
                 client.Id,
                 assets[randon].Id,
-                (ushort)amount,
+                (short)amount,
                 randon % 2 == 0 ?  OperationType.INPUT : OperationType.OUTPUT
             )
         );
