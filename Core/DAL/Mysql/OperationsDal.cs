@@ -45,7 +45,7 @@ public class OperationsDal : MysqlAbstraction
         {
             ResultTasks.SetMessageError(e.Message);
             await transaction.RollbackAsync();
-            throw;
+            throw new Exception($"Failed to create operation: {e.Message}");
         }
     }
     
@@ -83,9 +83,7 @@ public class OperationsDal : MysqlAbstraction
         catch(Exception e)
         {
             ResultTasks.SetMessageError(e.Message);
-            throw;
+            throw new Exception($"Error on get operations by client and asset id. Error -> {e.Message}");
         }
-        
-        return operations;
     }
 }
