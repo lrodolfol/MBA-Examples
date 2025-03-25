@@ -47,7 +47,7 @@ public class Worker : BackgroundService
             var eventingBasicConsumer = new AsyncEventingBasicConsumer(_channel);
             eventingBasicConsumer.ReceivedAsync += this.OnMessage;
 
-            _channel.BasicConsumeAsync("publisher-events-queue", false, eventingBasicConsumer);
+            await _channel.BasicConsumeAsync("publisher-events-queue", false, eventingBasicConsumer);
 
             await Task.Delay(1000, stoppingToken);
         }
@@ -67,10 +67,10 @@ public class Worker : BackgroundService
             {
                 //colocar UnitOfWork para todos processos.
 
-                var operationsServices = _serviceProvider.GetRequiredService<OperationsService>(); //colocar como injeção de dependência
+                var operationsServices = _serviceProvider.GetRequiredService<OperationsService>();
                 await operationsServices.ProcessOperationReceivedAsync(operationCreated);
 
-                var positionsService = _serviceProvider.GetRequiredService<PositionsService>(); //colocar como injeção de dependência
+                var positionsService = _serviceProvider.GetRequiredService<PositionsService>();
                 var amoutConverted = operationCreated.OperationType == OperationType.INPUT
                     ? operationCreated.Amount : operationCreated.Amount * -1;
                 
@@ -85,8 +85,9 @@ public class Worker : BackgroundService
                 
                 await _channel.BasicAckAsync(eventArgs.DeliveryTag, false);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
+                _logger.LogError(e, "Error on process operation");
                 await _channel.BasicNackAsync(eventArgs.DeliveryTag, multiple: false, requeue: true);
             }
         });
