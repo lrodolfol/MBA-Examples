@@ -17,11 +17,13 @@ public class Worker : BackgroundService
     private ConnectionFactory _factory;
     private IConnection _connection;
     private IChannel _channel;
+    
+    IServiceProvider _serviceProvider;
 
     private readonly MyConfigurations.RabbitMqConfiguration _rabbitMqConfiguration =
         MyConfigurations.RabbitMqEnvironment;
 
-    public Worker(ILogger<Worker> logger)
+    public Worker(ILogger<Worker> logger, IServiceProvider serviceProvider)
     {
         _factory = new ConnectionFactory()
         {
@@ -35,6 +37,7 @@ public class Worker : BackgroundService
         _channel = _connection.CreateChannelAsync().Result;
         _channel.BasicQosAsync(0, 5, false);
         _logger = logger;
+        _serviceProvider = serviceProvider;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -63,11 +66,11 @@ public class Worker : BackgroundService
             try
             {
                 //colocar UnitOfWork para todos processos.
-                
-                var operationsServices = new OperationsService(); //colocar como injeção de dependência
+
+                var operationsServices = _serviceProvider.GetRequiredService<OperationsService>(); //colocar como injeção de dependência
                 await operationsServices.ProcessOperationReceivedAsync(operationCreated);
-                
-                var positionsService = new PositionsService(); //colocar como injeção de dependência
+
+                var positionsService = _serviceProvider.GetRequiredService<PositionsService>(); //colocar como injeção de dependência
                 var amoutConverted = operationCreated.OperationType == OperationType.INPUT
                     ? operationCreated.Amount : operationCreated.Amount * -1;
                 
