@@ -1,5 +1,6 @@
 using Core.Configurations;
 using Core.DAL.Mysql;
+using Core.Helpers;
 using Core.Models.Entities;
 using Core.Models.Enums;
 using Core.Models.Events;
@@ -87,19 +88,4 @@ public class Worker : BackgroundService
             }
         });
     }
-}
-
-//colocar dentro do core
-public static partial class Extensions
-{
-    public static string Serialize<T>(this T objectToSerialize) =>
-        System.Text.Json.JsonSerializer.Serialize<T>(objectToSerialize);
-
-    public static T Deserialize<T>(this string jsonText) => System.Text.Json.JsonSerializer.Deserialize<T>(jsonText);
-
-    public static byte[] ToByteArray(this string text) => System.Text.Encoding.UTF8.GetBytes(text);
-
-    public static string ToUTF8String(this byte[] bytes) => System.Text.Encoding.UTF8.GetString(bytes);
-
-    public static ReadOnlyMemory<byte> ToReadOnlyMemory(this byte[] bytes) => new ReadOnlyMemory<byte>(bytes);
 }
