@@ -62,7 +62,7 @@ do
         await Task.WhenAll(tasksMessageToCache);
     
     logger.LogInformation($"{operations.Count} Operations have been published. Waiting 5 minutes to create new operations.");
-    Thread.Sleep(1000);
+    Thread.Sleep(1_000 * 60 * 5);
 } while (true);
 
 async Task<List<OperationCreated>> CreateNewClientOperation()
