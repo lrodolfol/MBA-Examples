@@ -98,7 +98,7 @@ public class RabbitMqMessageBrocker<T> : IMessageBrocker, IDisposable where T : 
         {
             { "x-dead-letter-exchange", $"{_modelMessage.ExchangeDeadLeatter}" },
             { "x-dead-letter-routing-key", _modelMessage.RoutingKey },
-            { "x-message-ttl", 600000 },
+            { "x-message-ttl", 1_000 * 60 * 60 },
             { "x-queue-mode", "lazy"}
         };
     }
