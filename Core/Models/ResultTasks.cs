@@ -10,4 +10,10 @@ public struct ResultTasks(bool isSuccess = true, string? errorMessage = null)
         ErrorMessage = message;
         IsSuccess = false;
     }
+
+    public void RemoveAllMessages()
+    {
+        ErrorMessage = null;
+        IsSuccess = true;
+    }
 }
