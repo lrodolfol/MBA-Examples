@@ -1,6 +1,7 @@
 ﻿using Core.Configurations;
 using Core.DAL.Mysql;
 using Core.Models.Entities;
+using EventsConsumer.Models.Exceptions;
 
 namespace EventsConsumer.Services;
 
@@ -15,12 +16,12 @@ public class PositionsService
     {
         if (positions.Date.DayOfWeek == DayOfWeek.Sunday || positions.Date.DayOfWeek == DayOfWeek.Saturday)
         {
-            throw new ("The position date is not a business day for position -> " + positions.ToString());
+            throw new InvalidBusinessDayException("The position date is not a business day for position -> " + positions.ToString());
         }
         
         if(positions.Amount < 0)
         {
-            throw new ("The amount of position is negative for position -> " + positions.ToString());
+            throw new NegativeAmountException("The amount of position is negative for position -> " + positions.ToString());
         }
         
         var dal = new PositionsDal(

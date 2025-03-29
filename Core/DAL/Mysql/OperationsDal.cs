@@ -1,6 +1,7 @@
 ﻿using Core.DAL.Abstractions;
 using Core.Models;
 using Core.Models.Entities;
+using Core.Models.Enums;
 using Core.Models.Events;
 using MySqlConnector;
 
@@ -23,8 +24,8 @@ public class OperationsDal : MysqlAbstraction
 
         try
         {
-            var query = @$"INSERT INTO {TableName} (ClientId, AssetId, Amount, DateOperation) 
-                        VALUES (@ClientId, @AssetId, @Amount, @DateOperation)";
+            var query = @$"INSERT INTO {TableName} (ClientId, AssetId, Amount, DateOperation, OperationType) 
+                        VALUES (@ClientId, @AssetId, @Amount, @DateOperation, @OperationType)";
             
             await using var command = new MySqlCommand(query, connection, transaction);
 
@@ -32,11 +33,13 @@ public class OperationsDal : MysqlAbstraction
             command.Parameters.Add("@AssetId", MySqlDbType.Int16);
             command.Parameters.Add("@Amount", MySqlDbType.Int16);
             command.Parameters.Add("@DateOperation", MySqlDbType.Date);
+            command.Parameters.Add("@OperationType", MySqlDbType.String);
 
             command.Parameters["@ClientId"].Value = operation.ClientId;
             command.Parameters["@AssetId"].Value = operation.AssetId;
             command.Parameters["@Amount"].Value = operation.Amount;
             command.Parameters["@DateOperation"].Value = operation.DateOperation;
+            command.Parameters["@OperationType"].Value = operation.OperationType.ToString();
 
             await command.ExecuteNonQueryAsync();
             await transaction.CommitAsync();
@@ -70,10 +73,11 @@ public class OperationsDal : MysqlAbstraction
             while (reader.Read())
             {
                 var operation = new Operations(
-                    (int)reader["clientId"],
-                    (int)reader["assetsId"],
-                    (short)reader["amount"],
-                    DateOnly.FromDateTime(DateTime.Parse(reader["DateOperation"].ToString()!))
+                     Convert.ToInt32(reader["clientId"]),
+                     Convert.ToInt32(reader["assetId"]),
+                     Convert.ToInt16(reader["amount"]),
+                    DateOnly.FromDateTime(DateTime.Parse(reader["DateOperation"].ToString()!)),
+                     (OperationType)Enum.Parse(typeof(OperationType), reader["operationType"].ToString()!)
                     );
                 operations.Add(operation);
             }

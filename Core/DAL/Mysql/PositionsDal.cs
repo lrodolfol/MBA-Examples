@@ -22,7 +22,7 @@ public class PositionsDal : MysqlAbstraction
 
         try
         {
-            var query = @$"INSERT INTO {TableName} (client_id, asset_id, amount, date) 
+            var query = @$"INSERT INTO {TableName} (ClientId, AssetId, Amount, Date) 
                     VALUES (@ClientId, @AssetId, @Amount, @Date)
                     ON DUPLICATE KEY UPDATE amount = COALESCE(amount, 0) + (@Amount)";
             

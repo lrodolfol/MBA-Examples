@@ -33,7 +33,8 @@ public class OperationsService
                 operationCreated.ClientId, 
                 operationCreated.AssetId, 
                 operationCreated.Amount, 
-                DateOnly.FromDateTime(operationCreated.Moment.DateTime)
+                DateOnly.FromDateTime(operationCreated.Moment.DateTime),
+                operationCreated.OperationType
             )
         );
     }
