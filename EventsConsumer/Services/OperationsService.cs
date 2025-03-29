@@ -47,7 +47,7 @@ public class OperationsService
     private static void CheckIfClientHasEnoughtBalance(OperationCreated operationCreated, List<Operations> clientOperations)
     {
         if (clientOperations.Count == 0 && operationCreated.OperationType == OperationType.OUTPUT)
-            throw new InsufficientBalanceException($"The client does not have enough balance to perform the operation. The client does not have any operations for the asset informed. Message: {{operationCreated.ToString()}}");
+            throw new InsufficientBalanceException($"The client does not have enough balance to perform the operation. The client does not have any operations for the asset informed. Message: {operationCreated.Serelize()}");
         
         var totalInput = clientOperations.Where(x => x.OperationType == OperationType.INPUT).Sum(x => x.Amount);
         var totalOutput = clientOperations.Where(x => x.OperationType == OperationType.OUTPUT).Sum(x => x.Amount);
@@ -57,6 +57,6 @@ public class OperationsService
             (operationCreated.Amount *- 1) : operationCreated.Amount;
         
         if(totalAmount <= 0)
-            throw new InsufficientBalanceException($"The client does not have enough balance to perform the operation. The client has a total balance of {totalAmount} and the amount operation is {operationCreated.Amount}. Message {{operationCreated.ToString()}}");
+            throw new InsufficientBalanceException($"The client does not have enough balance to perform the operation. The client has a total balance of {totalAmount} and the amount operation is {operationCreated.Amount}. Message {operationCreated.Serelize()}");
     }
 }
