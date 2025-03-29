@@ -14,15 +14,8 @@ public class PositionsService
 
     public async Task UpInsertPositionAsync(Positions positions)
     {
-        if (positions.Date.DayOfWeek == DayOfWeek.Sunday || positions.Date.DayOfWeek == DayOfWeek.Saturday)
-        {
-            throw new InvalidBusinessDayException("The position date is not a business day for position -> " + positions.ToString());
-        }
-        
         if(positions.Amount < 0)
-        {
             throw new NegativeAmountException("The amount of position is negative for position -> " + positions.ToString());
-        }
         
         var dal = new PositionsDal(
             _mysqlEnvironments.Host, 

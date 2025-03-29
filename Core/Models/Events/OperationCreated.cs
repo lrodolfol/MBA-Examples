@@ -12,4 +12,7 @@ public struct OperationCreated
     
     public OperationCreated(int clientId, int assetId, short amount, OperationType operationType) =>
         (ClientId, AssetId, Amount, OperationType, Moment) = (clientId, assetId, amount, operationType, DateTimeOffset.Now);
+    
+    public override string ToString() 
+        => $"ClientId: {ClientId}, AssetId: {AssetId}, Amount: {Amount}, OperationType: {OperationType}, Moment: {Moment}";
 }
