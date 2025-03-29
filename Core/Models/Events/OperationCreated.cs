@@ -1,4 +1,5 @@
-﻿using Core.Models.Enums;
+﻿using System.Text.Json;
+using Core.Models.Enums;
 
 namespace Core.Models.Events;
 
@@ -15,4 +16,6 @@ public struct OperationCreated
     
     public override string ToString() 
         => $"ClientId: {ClientId}, AssetId: {AssetId}, Amount: {Amount}, OperationType: {OperationType}, Moment: {Moment}";
+    
+    public string Serelize() => JsonSerializer.Serialize(this);
 }
