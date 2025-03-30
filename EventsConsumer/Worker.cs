@@ -68,7 +68,7 @@ public class Worker : BackgroundService
         var message = eventArgs.Body.ToArray().ToUTF8String();
         var operationCreated = message.Deserialize<OperationCreated>();
 
-        //_logger.LogInformation("Receives from routinkey. Message: {0}", message);
+        _logger.LogInformation("Receives from routinkey. Message: {0}", message);
 
         try
         {
