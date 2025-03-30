@@ -3,7 +3,6 @@ using Core.Configurations;
 using Core.DAL.Mysql;
 using Core.Models.Enums;
 using Core.Models.Events;
-using EventsPublisher;
 using EventsPublisher.InfraServices;
 using EventsPublisher.Models;
 using EventsPublisher.ModelServices;
@@ -60,9 +59,13 @@ do
 
     if(tasksMessageToCache.Count > 0)
         await Task.WhenAll(tasksMessageToCache);
-    
-    logger.LogInformation($"{operations.Count} Operations have been published. Waiting 5 minutes to create new operations.");
-    Thread.Sleep(1_000 * 60 * 5);
+
+    short timeToSleepInMinutes = 3;
+    logger.LogInformation(
+            "{0} Operations have been published. Waiting {1} minutes to create new operations.", 
+            operations.Count, timeToSleepInMinutes
+        );
+    Thread.Sleep(1_000 * 60 * timeToSleepInMinutes);
 } while (true);
 
 async Task<List<OperationCreated>> CreateNewClientOperation()
@@ -73,7 +76,7 @@ async Task<List<OperationCreated>> CreateNewClientOperation()
     List<OperationCreated> operations = new List<OperationCreated>();
     
     var rand = new Random();
-    if (rand.Next(1, 5) % 2 == 0)
+    if (rand.Next(1, 10) == 6) // 10% of chance to create new clients. Ramdon rule.
         await clientServices.PersistClientsAsync(clientServices.CreateMockClients());
 
     var clients = await clientServices.GetClientsAsync();
@@ -84,11 +87,11 @@ async Task<List<OperationCreated>> CreateNewClientOperation()
     }
     
     var assets = await assetsServices.GetAssetsAsync();
-    var randon = 0;
     
     foreach (var client in clients)
     {
-        randon = rand.Next(1, assets.Count);
+        var randon = rand.Next(1, assets.Count);
+        Console.WriteLine(randon);
         var amount = rand.Next(1, 1_000);
 
         operations.Add

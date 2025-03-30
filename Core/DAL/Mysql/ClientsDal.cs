@@ -49,7 +49,7 @@ public class ClientsDal : MysqlAbstraction, IClientDal
         }
     }
 
-    public async Task<List<Clients>> GetClientsAsync(short limit = 100)
+    public async Task<List<Clients>> GetClientsAsync(short limit = 500)
     {
         var clientList = new List<Clients>();
         await using var connection = new MySqlConnection(_connectionBuilder.ConnectionString);

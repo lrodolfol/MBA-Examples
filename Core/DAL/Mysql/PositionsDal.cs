@@ -19,23 +19,25 @@ public class PositionsDal : MysqlAbstraction
         await connection.OpenAsync();
 
         await using var transaction = await connection.BeginTransactionAsync();
-
+        var amountForUpdate = positions.Amount;
         try
         {
             var query = @$"INSERT INTO {TableName} (ClientId, AssetId, Amount, Date) 
                     VALUES (@ClientId, @AssetId, @Amount, @Date)
-                    ON DUPLICATE KEY UPDATE amount = COALESCE(amount, 0) + (@Amount)";
+                    ON DUPLICATE KEY UPDATE amount = COALESCE(amount, 0) + (@AmountForUpdate)";
             
             await using var command = new MySqlCommand(query, connection, transaction);
 
             command.Parameters.Add("@ClientId", MySqlDbType.Int16);
             command.Parameters.Add("@AssetId", MySqlDbType.Int16);
             command.Parameters.Add("@Amount", MySqlDbType.Int16);
+            command.Parameters.Add("@AmountForUpdate", MySqlDbType.Int16);
             command.Parameters.Add("@Date", MySqlDbType.Date);
 
             command.Parameters["@ClientId"].Value = positions.ClientId;
             command.Parameters["@AssetId"].Value = positions.AssetId;
-            command.Parameters["@Amount"].Value = positions.Amount;
+            command.Parameters["@Amount"].Value = Math.Abs(positions.Amount);
+            command.Parameters["@AmountForUpdate"].Value = amountForUpdate;
             command.Parameters["@Date"].Value = positions.Date;
 
             await command.ExecuteNonQueryAsync();
