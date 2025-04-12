@@ -3,7 +3,7 @@ using StackExchange.Redis;
 
 namespace EventsPublisher.InfraServices;
 
-public class RedisDataCaching
+public class RedisDataCaching : IDisposable
 {
     private static readonly Lazy<ConnectionMultiplexer> LazyConnection = new(() =>
     {
@@ -57,5 +57,10 @@ public class RedisDataCaching
     public async Task RemoveAsync(string key)
     {
         await _database.KeyDeleteAsync(key);
+    }
+
+    public void Dispose()
+    {
+        
     }
 }
