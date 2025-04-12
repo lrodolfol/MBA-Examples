@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Core.Configurations;
 using Core.DAL.Mysql;
 using Core.Models.Enums;
@@ -67,12 +67,12 @@ do
     if(tasksMessageToCache.Count > 0)
         await Task.WhenAll(tasksMessageToCache);
 
-    short timeToSleepInMinutes = 3;
+    short timeToSleepInMinutes = 0;
     logger.LogInformation(
             "{0} Operations have been published. Waiting {1} minutes to create new operations.", 
             operations.Count, timeToSleepInMinutes
         );
-    Thread.Sleep(1_000 * 60 * timeToSleepInMinutes);
+    await Task.Delay(TimeSpan.FromMinutes(timeToSleepInMinutes));
 } while (true);
 
 async Task<List<OperationCreated>> CreateNewClientOperation()
@@ -83,8 +83,8 @@ async Task<List<OperationCreated>> CreateNewClientOperation()
     List<OperationCreated> operations = new List<OperationCreated>();
     
     var rand = new Random();
-    if (rand.Next(1, 10) == 6) // 10% of chance to create new clients. Ramdon rule.
-        await clientServices.PersistClientsAsync(clientServices.CreateMockClients());
+    // if (rand.Next(1, 10) == 6) // 10% of chance to create new clients. Ramdon rule.
+    //     await clientServices.PersistClientsAsync(clientServices.CreateMockClients());
 
     var clients = await clientServices.GetClientsAsync();
     if (clients.Count <= 0)
@@ -97,8 +97,7 @@ async Task<List<OperationCreated>> CreateNewClientOperation()
     
     foreach (var client in clients)
     {
-        var randon = rand.Next(1, assets.Count);
-        Console.WriteLine(randon);
+        var random = rand.Next(1, assets.Count);
         var amount = rand.Next(1, 1_000);
 
         operations.Add
@@ -106,9 +105,9 @@ async Task<List<OperationCreated>> CreateNewClientOperation()
             new OperationCreated
             (
                 client.Id,
-                assets[randon].Id,
+                assets[random].Id,
                 (short)amount,
-                randon % 2 == 0 ?  OperationType.INPUT : OperationType.OUTPUT
+                random % 2 == 0 ?  OperationType.INPUT : OperationType.OUTPUT
             )
         );
     }
