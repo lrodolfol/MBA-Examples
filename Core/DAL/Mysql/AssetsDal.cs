@@ -23,7 +23,7 @@ public class AssetsDal : MysqlAbstraction,  IAssetsDal
         {
             await connection.OpenAsync();
 
-            var query = $"SELECT Id, Name FROM {DatabaseName}.{TableName}";
+            var query = $"SELECT Id, Name FROM {DatabaseName}.{TableName} ORDER BY RAND()";
             await using var command = new MySqlCommand(query, connection);
 
             await using var reader = await command.ExecuteReaderAsync();
