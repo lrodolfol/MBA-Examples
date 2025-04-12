@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Core.Configurations;
 using Core.DAL.Mysql;
 using Core.Models.Enums;
@@ -36,14 +36,21 @@ var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<P
 do
 {
     var operations = await CreateNewClientOperation();
+    
+    if (operations.Count <= 0)
+    {
+        logger.LogInformation("No operations found. Waiting before next attempt.");
+        await Task.Delay(TimeSpan.FromMinutes(1));
+        continue;
+    }
 
-    var cacheService = new RedisDataCaching();
+    using var cacheService = new RedisDataCaching();
     
     var tradeMessage = new TradeMessage();
     var tasksMessageToCache = new List<Task>();
-    IMessageBrocker messageBrocker = new RabbitMqMessageBrocker<TradeMessage>(tradeMessage);
+    using IMessageBrocker messageBrocker = new RabbitMqMessageBrocker<TradeMessage>(tradeMessage);
     
-    foreach (OperationCreated operation in operations)
+    foreach (OperationCreated operation in operations) //seria legal fazer um chun() aqui
     {
         var messageJsonFormated = JsonSerializer.Serialize(operation);
         if (!await messageBrocker.PreparePublish(messageJsonFormated))
