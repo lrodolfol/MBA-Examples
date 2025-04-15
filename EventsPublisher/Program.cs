@@ -69,7 +69,7 @@ do
 
     short timeToSleepInMinutes = 0;
     logger.LogInformation(
-            "{0} Operations have been published. Waiting {1} minutes to create new operations.", 
+            "{0} Operations have been published. Waiting {1} minute(s) to create new operations.", 
             operations.Count, timeToSleepInMinutes
         );
     await Task.Delay(TimeSpan.FromMinutes(timeToSleepInMinutes));

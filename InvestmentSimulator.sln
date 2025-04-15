@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventsConsumer", "EventsCon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{BAFBCA17-5AC4-4507-9898-1C4FE965C35E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetPricePublisher", "AssetPricePublisher\AssetPricePublisher.csproj", "{BD03AFF6-1708-4B6F-9BA7-572B3E4D9285}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{BAFBCA17-5AC4-4507-9898-1C4FE965C35E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BAFBCA17-5AC4-4507-9898-1C4FE965C35E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BAFBCA17-5AC4-4507-9898-1C4FE965C35E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD03AFF6-1708-4B6F-9BA7-572B3E4D9285}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD03AFF6-1708-4B6F-9BA7-572B3E4D9285}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD03AFF6-1708-4B6F-9BA7-572B3E4D9285}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD03AFF6-1708-4B6F-9BA7-572B3E4D9285}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
