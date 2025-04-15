@@ -1,3 +1,5 @@
+using AssetPricePublisher.ModelServices;
+
 namespace AssetPricePublisher;
 
 public class Worker : BackgroundService
@@ -15,11 +17,22 @@ public class Worker : BackgroundService
         {
             short timeToSleepInMinutes = 1;
             var timeNow = DateTimeOffset.Now;
+            
+            var assetsServices = new AssetsServices(); //CRIAR COM INJECAO DE DEPENDENCIA
         
+            var assets = await assetsServices.GetAllAssets();
+            var pricedAssets = assetsServices.LoadPricedAssetsFromAssets(assets);
+            
             if (timeNow.Hour == 12)
             {
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
+                    //buscar todos ativos na base de dados
+                    
+                    
+                    //colocar preço em cada um deles por id ativo
+                    //criar uma mensagem e publicar na mensageria
+                    
                     _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 }
             
