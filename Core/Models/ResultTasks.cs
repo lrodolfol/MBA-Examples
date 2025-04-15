@@ -1,6 +1,6 @@
 ﻿namespace Core.Models;
 
-public struct ResultTasks(bool isSuccess = true, string? errorMessage = null)
+public class ResultTasks(bool isSuccess = true, string? errorMessage = null)
 {
     public bool IsSuccess = isSuccess;
     public string? ErrorMessage = errorMessage;

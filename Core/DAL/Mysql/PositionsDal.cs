@@ -24,7 +24,8 @@ public class PositionsDal : MysqlAbstraction
         {
             var query = @$"INSERT INTO {TableName} (ClientId, AssetId, Amount, Date) 
                     VALUES (@ClientId, @AssetId, @Amount, @Date)
-                    ON DUPLICATE KEY UPDATE amount = COALESCE(amount, 0) + (@AmountForUpdate)";
+                    ON DUPLICATE KEY UPDATE amount = COALESCE(amount, 0) + (@AmountForUpdate),
+                    UpdatedCount = COALESCE(UpdatedCount, 0) + 1";
             
             await using var command = new MySqlCommand(query, connection, transaction);
 
