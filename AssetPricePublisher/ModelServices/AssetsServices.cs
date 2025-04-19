@@ -15,26 +15,26 @@ public class AssetsServices
     //     _assetsDal = assetsDal;
     // }
 
-    public async Task<List<Assets>> GetAllAssets()
+    public async Task<List<string>> GetAssetsName()
     {
-        var assets = await _assetsDal.GetAssetsAsync();
+        var assets = await _assetsDal.GetAssetsNames();
         if(! _assetsDal.ResultTasks.IsSuccess)
-            _logger.LogError("{nameof} Fail for get assets from database - Error - {error}", nameof(GetAllAssets), _assetsDal.ResultTasks.ErrorMessage);
+            _logger.LogError("{nameof} Fail for get assets from database - Error - {error}", nameof(GetAssetsName), _assetsDal.ResultTasks.ErrorMessage);
         
         return assets;
     }
 
-    public List<PricedAsset> LoadPricedAssetsFromAssets(List<Assets> assets)
+    public List<PricedAsset> LoadPricedAssetsFromAssets(List<string> assets)
     {
         var pricedAssets = new List<PricedAsset>();
         var rand = new Random();
         
-        assets.ForEach(x =>
+        assets.ForEach(assetsName =>
         {
             var price = Math.Round((decimal)rand.NextDouble() * 9.99m, 2);
             
             pricedAssets.Add(
-                new PricedAsset(x.Id, x.Name, price)
+                new PricedAsset(assetsName, price)
                 );    
         });
         

@@ -44,4 +44,36 @@ public class AssetsDal : MysqlAbstraction,  IAssetsDal
         
         return assetsList;
     }
+    
+    public async Task<List<string>> GetAssetsNames()
+    {
+        List<string> assetsNamesList = new List<string>();
+        await using var connection = new MySqlConnection(_connectionBuilder.ConnectionString);
+
+        try
+        {
+            await connection.OpenAsync();
+
+            var query = $"SELECT DISTINCT(Name) FROM {DatabaseName}.{TableName}";
+            await using var command = new MySqlCommand(query, connection);
+
+            await using var reader = await command.ExecuteReaderAsync();
+
+            if (!reader.HasRows)
+                return assetsNamesList;
+
+            while (await reader.ReadAsync())
+            {
+                if (string.IsNullOrWhiteSpace(reader.GetString(0)))
+                    continue;
+                
+                assetsNamesList.Add(reader.GetString(0));
+            }   
+        }catch(Exception e)
+        {
+            ResultTasks.SetMessageError(e.Message);
+        }
+        
+        return assetsNamesList;
+    }
 }
