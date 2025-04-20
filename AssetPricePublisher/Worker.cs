@@ -1,3 +1,4 @@
+using AssetPricePublisher.InfraServices;
 using AssetPricePublisher.Models;
 using AssetPricePublisher.ModelServices;
 using Core.Models.Entities;
@@ -23,28 +24,25 @@ public class Worker : BackgroundService
             AssetsServices assetsServices = new AssetsServices(); //CRIAR COM INJECAO DE DEPENDENCIA
         
             //buscar todos ativos na base de dados
-            List<string> assets = await assetsServices.GetAssetsName();
+            List<Assets> assets = await assetsServices.GetAssetsName();
             
             //colocar preço em cada um deles por id ativo
             List<PricedAsset> pricedAssets = assetsServices.LoadPricedAssetsFromAssets(assets);
             
             if (timeNow.Hour == 12)
             {
+                //criar uma mensagem e publicar na mensageria
+                var messageBrocker = new KafkaClient("localhost:9092", "producer1", 0);
+                
                 foreach (var assetPriced in pricedAssets)
                 {
+                    var jsonMessage = System.Text.Json.JsonSerializer.Serialize(assetPriced);
+                    var byteMessage = System.Text.Encoding.UTF8.GetBytes(jsonMessage);
                     
+                    await messageBrocker.PublishAsync(byteMessage);
+                    
+                    _logger.LogInformation("Message sent: {message}", jsonMessage);
                 }
-                
-                if (_logger.IsEnabled(LogLevel.Information))
-                {
-                           
-                    
-                    //criar uma mensagem e publicar na mensageria
-                    
-                    _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                }
-            
-                await Task.Delay(TimeSpan.FromMinutes(timeToSleepInMinutes), stoppingToken);
             }
             else
             {
