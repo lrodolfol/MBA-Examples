@@ -1,4 +1,5 @@
 ﻿using AssetPricePublisher.Models;
+using Core.Configurations;
 using Core.DAL.Mysql;
 using Core.Models.Entities;
 
@@ -6,20 +7,21 @@ namespace AssetPricePublisher.ModelServices;
 
 public class AssetsServices
 {
+    private readonly MyConfigurations.MysqlConfiguration _mysqlEnvironments = MyConfigurations.MysqlEnvironment;
     private readonly ILogger<AssetsServices> _logger;
     private readonly AssetsDal _assetsDal;
     
-    // public AssetsServices(ILogger<AssetsServices> logger, AssetsDal assetsDal)
-    // {
-    //     _logger = logger;
-    //     _assetsDal = assetsDal;
-    // }
+    public AssetsServices(ILogger<AssetsServices> logger, AssetsDal assetsDal)
+    {
+        _logger = logger;
+        _assetsDal = assetsDal;
+    }
 
-    public async Task<List<Assets>> GetAssetsName()
+    public async Task<List<Assets>> GetAssets()
     {
         var assets = await _assetsDal.GetAssetsAsync();
         if(! _assetsDal.ResultTasks.IsSuccess)
-            _logger.LogError("{nameof} Fail for get assets from database - Error - {error}", nameof(GetAssetsName), _assetsDal.ResultTasks.ErrorMessage);
+            _logger.LogError("{nameof} Fail for get assets from database - Error - {error}", nameof(GetAssets), _assetsDal.ResultTasks.ErrorMessage);
         
         return assets;
     }
