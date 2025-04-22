@@ -10,8 +10,6 @@ public class KafkaClient : IPricedAssetService
     private readonly string _topic;
     private readonly int _partition;
     private readonly int _retentionTtlPerHour;
-    private readonly string _username;
-    private readonly string _password;
     
     private readonly ProducerConfig _producerConfig;
 
