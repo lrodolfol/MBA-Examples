@@ -82,7 +82,7 @@ public class Worker : BackgroundService
             var byteMessage = System.Text.Encoding.UTF8.GetBytes(jsonMessage);
                     
             if(await messageBrocker.PublishAsync(byteMessage))
-                _logger.LogInformation("Message published to topic {topic} - {message}", "teste", jsonMessage);
+                _logger.LogInformation("Message published to topic {topic} - {message}", kafkaProperties.topicName, jsonMessage);
             else
                 _logger.LogError("Fail to publishMessage, Will be send to cache - {message}", jsonMessage);
         }
