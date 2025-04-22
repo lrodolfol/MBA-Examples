@@ -9,12 +9,13 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly AssetsServices _assetsServices;
-    private readonly IServiceScopeFactory  _scope;
-    public Worker(IServiceScopeFactory scope, ILogger<Worker> logger)
+    private readonly IConfiguration _configuration;
+
+    public Worker(IServiceScopeFactory scope, ILogger<Worker> logger, IConfiguration configuration)
     {
-        _scope = scope;
-        _assetsServices = _scope.CreateScope().ServiceProvider.GetRequiredService<AssetsServices>();
+        _assetsServices = scope.CreateScope().ServiceProvider.GetRequiredService<AssetsServices>();
         _logger = logger;
+        _configuration = configuration;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -27,7 +28,7 @@ public class Worker : BackgroundService
             
             DateTimeOffset timeNow = DateTimeOffset.Now;
             
-            if (timeNow.Hour > 6 && !updatedForIntraday)
+            if(timeNow.Hour > 6 && !updatedForIntraday)
             {
                 try
                 {
@@ -66,13 +67,14 @@ public class Worker : BackgroundService
          }
          
          var pricedAssets = _assetsServices.LoadPricedAssetsFromAssets(assets);
-        
-        // List<PricedAsset> pricedAssets = new List<PricedAsset>();
-        // pricedAssets.Add(new PricedAsset(1, "ABC", 100m));
-        // pricedAssets.Add(new PricedAsset(2, "ABC", 100m));
-        // pricedAssets.Add(new PricedAsset(3, "ABC", 100m));
-        
-        var messageBrocker = new KafkaClient("localhost:9092", "teste", 0);
+         
+         var kafkaProperties = GetKafkaProperties();
+         var messageBrocker = new KafkaClient(
+             kafkaProperties.bootstrapServer,
+             kafkaProperties.topicName,
+             kafkaProperties.partitionsNumber,
+             kafkaProperties.retentionTtlPerHour
+             );
                 
         foreach (var assetPriced in pricedAssets)
         {
@@ -84,5 +86,19 @@ public class Worker : BackgroundService
             else
                 _logger.LogError("Fail to publishMessage, Will be send to cache - {message}", jsonMessage);
         }
+    }
+    
+    private (string bootstrapServer, string topicName, int partitionsNumber, int retentionTtlPerHour) GetKafkaProperties()
+    {
+        var bootstrapServers 
+            = _configuration["MessageBroker:Kafka:BootstrapServers"] ?? "localhost:9092";
+        var topic 
+            = _configuration["MessageBroker:Kafka:Topic"] ?? "assetsPriced";
+        var partition
+            = Convert.ToInt16(_configuration["MessageBroker:Kafka:PartitionsNumbers"] ?? "3");
+        var replicationFactor 
+            = Convert.ToInt16(_configuration["MessageBroker:Kafka:RetentionTtlPerHour"] ?? "1");
+
+        return (bootstrapServers, topic, partition, replicationFactor);
     }
 }

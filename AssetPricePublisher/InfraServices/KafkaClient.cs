@@ -9,16 +9,18 @@ public class KafkaClient : IPricedAssetService
     private readonly string _bootstrapServers;
     private readonly string _topic;
     private readonly int _partition;
+    private readonly int _retentionTtlPerHour;
     private readonly string _username;
     private readonly string _password;
     
     private readonly ProducerConfig _producerConfig;
-    
-    public KafkaClient(string bootstrapServers, string topic, int partition)
+
+    public KafkaClient(string bootstrapServers, string topic, int partition, int retentionTtlPerHour)
     {
         _bootstrapServers = bootstrapServers;
         _topic = topic;
         _partition = partition;
+        _retentionTtlPerHour = retentionTtlPerHour;
         
         _producerConfig = new ProducerConfig
         {
@@ -38,7 +40,7 @@ public class KafkaClient : IPricedAssetService
                 ReplicationFactor = 1,
                 Configs = new Dictionary<string, string>
                 {
-                    { "retention.ms", TimeSpan.FromHours(1).TotalMilliseconds.ToString(CultureInfo.CurrentCulture) }
+                    { "retention.ms", TimeSpan.FromHours(_retentionTtlPerHour).TotalMilliseconds.ToString(CultureInfo.CurrentCulture) }
                 }
             };
             
@@ -75,7 +77,7 @@ public class KafkaClient : IPricedAssetService
         
             var result = await producer.ProduceAsync(_topic, new Message<string, string>
             {
-                Key = Guid.NewGuid().ToString(),
+                Key = Guid.NewGuid().ToString().Substring(0,9),
                 Value = System.Text.Encoding.UTF8.GetString(message),
             
             });   
