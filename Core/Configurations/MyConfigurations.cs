@@ -4,6 +4,7 @@ public static class MyConfigurations
 {
     public static MysqlConfiguration MysqlEnvironment { get; set; } = new();
     public static RabbitMqConfiguration RabbitMqEnvironment { get; set; } = new();
+    public static KakfaConfiguration KakfaEnvironment { get; set; } = new();
 
     public static void LoadPropertiesFromEnvironmentVariables() => LoadMysqlConfiguration();
     private static void LoadMysqlConfiguration()
@@ -39,5 +40,13 @@ public static class MyConfigurations
         public string? Password { get; set; }
         public string? VirtualHost { get; set; }
         public string? Port { get; set; }
+    }
+
+    public class KakfaConfiguration
+    {
+        public string BootstrapServer { get; set; } = null!;
+        public string TopicName { get; set; } = null!;
+        public int PartitionsNumber { get; set; }
+        public int RetentionTtlPerHour { get; set; }
     }
 }
