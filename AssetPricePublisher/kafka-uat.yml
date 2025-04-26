@@ -1,40 +1,51 @@
 services:
-  
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_CLIENT_PORT: 2182
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
+    networks:
+      - dev_environment
 
   kafka:
-    image: confluentinc/cp-kafka:6.0.0
+    image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
     ports:
-      - "9092:9092"
-      - "9094:9094"
+      - "9093:9093"
+      - "9095:9095"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2182
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENERS: INTERNAL://:9093,OUTSIDE://:9095
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-project-uat-kafka-1:9093,OUTSIDE://host.docker.internal:9095
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
-
+    networks:
+      - dev_environment
+  
   control-center:
-    image: confluentinc/cp-enterprise-control-center:6.0.0
+    image: confluentinc/cp-enterprise-control-center:6.0.1
     hostname: control-center
     depends_on:
       - kafka
     ports:
-      - "9021:9021"
+      - "9022:9022"
     environment:
-      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka:29092'
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka-project-uat-kafka-1:9093'
       CONTROL_CENTER_REPLICATION_FACTOR: 1
-      CONTROL_CENTER_CONNECT_CLUSTER: http://kafka-connect:8083
-      PORT: 9021
+      CONTROL_CENTER_CONNECT_CLUSTER: http://app-connect:8083
+      PORT: 9022
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
+    networks:
+      - dev_environment
+
+networks:
+  dev_environment:
+    driver: bridge
+    external: true        

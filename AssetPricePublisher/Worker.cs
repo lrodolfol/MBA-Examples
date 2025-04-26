@@ -11,7 +11,7 @@ public class Worker : BackgroundService
     private readonly AssetsServices _assetsServices;
     private readonly IConfiguration _configuration;
 
-    public Worker(IServiceScopeFactory scope, ILogger<Worker> logger, IConfiguration configuration)
+    public Worker(IServiceScopeFactory scope, ILogger<Worker> logger, IConfigurationRoot configuration)
     {
         _assetsServices = scope.CreateScope().ServiceProvider.GetRequiredService<AssetsServices>();
         _logger = logger;
@@ -91,13 +91,13 @@ public class Worker : BackgroundService
     private (string bootstrapServer, string topicName, int partitionsNumber, int retentionTtlPerHour) GetKafkaProperties()
     {
         var bootstrapServers 
-            = _configuration["MessageBroker:Kafka:BootstrapServers"] ?? "localhost:9092";
+            = _configuration["MessageBrocker:Kafka:BootstrapServers"] ?? "localhost:9092";
         var topic 
-            = _configuration["MessageBroker:Kafka:Topic"] ?? "assetsPriced";
+            = _configuration["MessageBrocker:Kafka:Topic"] ?? "assetsPriced";
         var partition
-            = Convert.ToInt16(_configuration["MessageBroker:Kafka:PartitionsNumbers"] ?? "3");
+            = Convert.ToInt16(_configuration["MessageBrocker:Kafka:PartitionsNumbers"] ?? "3");
         var replicationFactor 
-            = Convert.ToInt16(_configuration["MessageBroker:Kafka:RetentionTtlPerHour"] ?? "1");
+            = Convert.ToInt16(_configuration["MessageBrocker:Kafka:RetentionTtlPerHour"] ?? "1");
 
         return (bootstrapServers, topic, partition, replicationFactor);
     }

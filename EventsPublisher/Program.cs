@@ -67,7 +67,7 @@ do
     if(tasksMessageToCache.Count > 0)
         await Task.WhenAll(tasksMessageToCache);
 
-    short timeToSleepInMinutes = 0;
+    short timeToSleepInMinutes = 1;
     logger.LogInformation(
             "{0} Operations have been published. Waiting {1} minute(s) to create new operations.", 
             operations.Count, timeToSleepInMinutes
