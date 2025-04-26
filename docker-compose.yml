@@ -19,3 +19,33 @@ services:
         MYSQL_DATABASE_PORT: 3306
     networks:
       - dev_environment
+
+  eventsConsumer:
+    image: eventsconsumer
+    build:
+      context: .
+      dockerfile: EventsConsumer/Dockerfile
+    environment:
+        ASPNETCORE_ENVIRONMENT: uat
+        MYSQL_DATABASE_HOST: mysql-DEV
+        MYSQL_DATABASE_USERNAME: root
+        MYSQL_DATABASE_PASSWORD: sinqia123
+        MYSQL_DATABASE_NAME: investment
+        MYSQL_DATABASE_PORT: 3306
+    networks:
+      - dev_environment
+  
+  AssetPricePublisher:
+    image: assetpricepublisher
+    build:
+      context: .
+      dockerfile: AssetPricePublisher/Dockerfile
+    environment:
+        ASPNETCORE_ENVIRONMENT: uat
+        MYSQL_DATABASE_HOST: mysql-DEV
+        MYSQL_DATABASE_USERNAME: root
+        MYSQL_DATABASE_PASSWORD: sinqia123
+        MYSQL_DATABASE_NAME: investment
+        MYSQL_DATABASE_PORT: 3306
+    networks:
+      - dev_environment
