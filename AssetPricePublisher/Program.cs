@@ -8,8 +8,10 @@ var builder = Host.CreateApplicationBuilder(args);
 
 MyConfigurations.LoadPropertiesFromEnvironmentVariables();
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "dev";
+
 IConfigurationRoot configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false)
     .AddJsonFile($"appsettings.{environment}.json", false)
     .Build();
 
