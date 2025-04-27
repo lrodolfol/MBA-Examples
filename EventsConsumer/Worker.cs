@@ -72,14 +72,9 @@ public class Worker : BackgroundService
 
         try
         {
-            //usar um serviço externo para validar se data é feriado
-            // if (operationCreated.Moment.DayOfWeek == DayOfWeek.Sunday || operationCreated.Moment.DayOfWeek == DayOfWeek.Saturday)
-            //     throw new InvalidBusinessDayException("The position date is not a business day for position -> " + operationCreated.ToString());
-
             //colocar UnitOfWork para todos processos de escrita na base.
 
             await _operationsServices.ProcessOperationReceivedAsync(operationCreated);
-
 
             var amoutConverted = operationCreated.OperationType == OperationType.INPUT
                 ? operationCreated.Amount
