@@ -10,3 +10,5 @@ InvestmentSimulator.sln.DotSettings.user
 .idea/.idea.InvestmentSimulator/.idea/sqldialects.xml
 
 .idea/.idea.InvestmentSimulator/.idea/
+
+.idea/.idea.InvestmentSimulator/Docker/docker-compose.generated.override.yml
