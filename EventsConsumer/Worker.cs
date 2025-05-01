@@ -90,6 +90,12 @@ public class Worker : BackgroundService
             );
 
             await _channel.BasicAckAsync(eventArgs.DeliveryTag, false);
+            
+            // ACUMULAR POSIÇÕES PARA VALIDAR BLOQUEIOS
+            // ENVIAR O CLIENT_ID E O ASSET_ID
+
+            var positionsForCheckBlock = new Tuple<int, int>(operationCreated.ClientId, operationCreated.AssetId);
+
         }
         catch (Exception e) when (e is InvalidBusinessDayException
                                   || e is NegativeAmountException
