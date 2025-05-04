@@ -5,6 +5,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{438F814C-759F-4C77-9004-E97D991B8445}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.yml = docker-compose.yml
+		dump.sql = dump.sql
+		kind-config.yml = kind-config.yml
+		mysql-deployment-service.yml = mysql-deployment-service.yml
+		steps.txt = steps.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventsConsumer", "EventsConsumer\EventsConsumer.csproj", "{A8F5A826-7BB4-4E2B-AC8D-0DD21B51D22B}"

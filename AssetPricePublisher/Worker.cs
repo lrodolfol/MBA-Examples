@@ -93,7 +93,7 @@ public class Worker : BackgroundService
         var bootstrapServers 
             = _configuration["MessageBrocker:Kafka:BootstrapServers"] ?? "localhost:9092";
         var topic 
-            = _configuration["MessageBrocker:Kafka:Topic"] ?? "assetsPriced";
+            = _configuration["MessageBrocker:Kafka:Topic"] ?? "asset-price";
         var partition
             = Convert.ToInt16(_configuration["MessageBrocker:Kafka:PartitionsNumbers"] ?? "3");
         var replicationFactor 

@@ -83,8 +83,8 @@ async Task<List<OperationCreated>> CreateNewClientOperation()
     List<OperationCreated> operations = new List<OperationCreated>();
     
     var rand = new Random();
-    // if (rand.Next(1, 10) == 6) // 10% of chance to create new clients. Ramdon rule.
-    //     await clientServices.PersistClientsAsync(clientServices.CreateMockClients());
+    if (rand.Next(1, 10) == 6) // 10% of chance to create new clients. Ramdon rule.
+          await clientServices.PersistClientsAsync(clientServices.CreateMockClients());
 
     var clients = await clientServices.GetClientsAsync();
     if (clients.Count <= 0)

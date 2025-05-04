@@ -13,7 +13,7 @@ namespace EventsConsumer;
 
 public class Worker : BackgroundService
 {
-    private ushort _consumerCount = 5;
+    private ushort _consumerCount = 1;
     private readonly ILogger<Worker> _logger;
     private ConnectionFactory _factory;
     private IConnection _connection;
@@ -24,8 +24,10 @@ public class Worker : BackgroundService
 
     private readonly OperationsService _operationsServices;
     private readonly PositionsService _positionsService;
+    private readonly BlockValidationService _blockValidationService;
 
-    public Worker(ILogger<Worker> logger, IServiceProvider serviceProvider)
+    public Worker(ILogger<Worker> logger, IServiceProvider serviceProvider,
+        BlockValidationService blockValidationService)
     {
         _factory = new ConnectionFactory()
         {
@@ -43,32 +45,32 @@ public class Worker : BackgroundService
 
         _positionsService = serviceProvider.GetRequiredService<PositionsService>();
         _operationsServices = serviceProvider.GetRequiredService<OperationsService>();
+        _blockValidationService = blockValidationService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            var eventingBasicConsumer = new AsyncEventingBasicConsumer(_channel);
-            eventingBasicConsumer.ReceivedAsync += this.OnMessage;
+        var eventingBasicConsumer = new AsyncEventingBasicConsumer(_channel);
+        eventingBasicConsumer.ReceivedAsync += this.OnMessage;
 
-            await _channel.BasicConsumeAsync("publisher-events-queue", false, eventingBasicConsumer);
+        await _channel.BasicConsumeAsync("publisher-events-queue", false, eventingBasicConsumer,
+            CancellationToken.None);
 
-            await Task.Delay(1000, stoppingToken);
-        }
+        //await Task.Delay(1000, stoppingToken);
     }
 
     private async Task OnMessage(object sender, BasicDeliverEventArgs eventArgs)
     {
-        await Task.Run(() => ProcessMessageAsync(eventArgs));
+        await ProcessMessageAsync(eventArgs);
     }
 
     private async Task ProcessMessageAsync(BasicDeliverEventArgs eventArgs)
     {
+        var processSuccess = false;
         var message = eventArgs.Body.ToArray().ToUTF8String();
         var operationCreated = message.Deserialize<OperationCreated>();
 
-        _logger.LogInformation("Receives from routinkey. Message: {0}", message);
+        //_logger.LogInformation("Receives from routinkey. Message: {0}", message);
 
         try
         {
@@ -90,24 +92,22 @@ public class Worker : BackgroundService
             );
 
             await _channel.BasicAckAsync(eventArgs.DeliveryTag, false);
-            
-            // ACUMULAR POSIÇÕES PARA VALIDAR BLOQUEIOS
-            // ENVIAR O CLIENT_ID E O ASSET_ID
-
-            var positionsForCheckBlock = new Tuple<int, int>(operationCreated.ClientId, operationCreated.AssetId);
-
+            processSuccess = true;
         }
         catch (Exception e) when (e is InvalidBusinessDayException
                                   || e is NegativeAmountException
                                   || e is InsufficientBalanceException)
         {
             _logger.LogError("Error on process operation. Details: {0}", e.Message);
-            await _channel.BasicNackAsync(eventArgs.DeliveryTag, multiple: false, requeue: false);
+            await _channel.BasicAckAsync(eventArgs.DeliveryTag, multiple: false);
         }
         catch (Exception e)
         {
             _logger.LogError("Error on process operation. Details: {0}", e.Message);
             await _channel.BasicNackAsync(eventArgs.DeliveryTag, multiple: false, requeue: true);
         }
+
+        if(processSuccess)
+            await _blockValidationService.BlockWorkFlowAsync((operationCreated.ClientId, operationCreated.AssetId));
     }
 }

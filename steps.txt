@@ -1,0 +1,24 @@
+kind create cluster --config kind-config.yaml --name cluster-dev
+executar:
+kubectl cluster-info --context kind-cluster-dev
+
+//verificar se o mysql ja esta rodando no cluster
+
+docker build -f .\AssetPricePublisher\Dockerfile -t asset-price-publisher:1.0 .  //executar na raiz da solução
+kind load docker-image asset-price-publisher:1.0 --name cluster-dev    //carregar a imagem para o kind
+
+execute:
+kubectl apply -f deployment.yml
+kubectl apply -f service.yml
+
+execute:
+kubectl get pods
+kubectl get deployments
+kubectl get services
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+kubectl create serviceaccount dashboard-admin
+kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin
+kubectl create token dashboard-admin
+kubectl proxy
+// vai rodar em http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/

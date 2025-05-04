@@ -16,7 +16,9 @@ configuration.GetSection("messageBrockers:rabbitMq").Bind(MyConfigurations.Rabbi
 
 builder.Services.AddTransient<ClientServices>()
     .AddTransient<OperationsService>()
-    .AddTransient<PositionsService>().BuildServiceProvider();
+    .AddTransient<BlockValidationService>()
+    .AddTransient<PositionsService>()
+    .BuildServiceProvider();
 
 builder.Services.AddHostedService<Worker>();
 

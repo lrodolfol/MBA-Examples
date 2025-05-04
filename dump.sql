@@ -1,4 +1,6 @@
-﻿use investment;
+﻿create database investment;
+
+use investment;
 
 
 CREATE TABLE Assets (
