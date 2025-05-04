@@ -1,4 +1,5 @@
 using AssetPricePublisher;
+using AssetPricePublisher.InfraServices;
 using AssetPricePublisher.ModelServices;
 using Core.Configurations;
 using Core.DAL.Abstractions;
@@ -28,7 +29,38 @@ builder.Services.AddScoped<AssetsServices>(AssetsServices => new AssetsServices(
     )
 );
 builder.Services.AddSingleton<IConfigurationRoot>(configuration);
+
+var kafkaProperties = GetKafkaProperties(configuration);
+
+builder.Services.AddSingleton<IPricedAssetService>(X =>
+{
+    var loggerKafka = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<KafkaClient>>();
+    
+    return new KafkaClient(kafkaProperties.bootstrapServer,
+        kafkaProperties.topicName,
+        kafkaProperties.partitionsNumber,
+        kafkaProperties.retentionTtlPerHour,
+        loggerKafka);
+});
+
 builder.Services.AddHostedService<Worker>();
 
 var host = builder.Build();
 host.Run();
+
+
+
+static (string bootstrapServer, string topicName, int partitionsNumber, int retentionTtlPerHour) 
+    GetKafkaProperties(IConfigurationRoot configuration)
+{
+    var bootstrapServers 
+        = configuration["MessageBrocker:Kafka:BootstrapServers"] ?? "localhost:9092";
+    var topic 
+        = configuration["MessageBrocker:Kafka:Topic"] ?? "asset-price";
+    var partition
+        = Convert.ToInt16(configuration["MessageBrocker:Kafka:PartitionsNumbers"] ?? "3");
+    var replicationFactor 
+        = Convert.ToInt16(configuration["MessageBrocker:Kafka:RetentionTtlPerHour"] ?? "1");
+
+    return (bootstrapServers, topic, partition, replicationFactor);
+}

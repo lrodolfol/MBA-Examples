@@ -10,12 +10,15 @@ public class Worker : BackgroundService
     private readonly ILogger<Worker> _logger;
     private readonly AssetsServices _assetsServices;
     private readonly IConfiguration _configuration;
+    private readonly IPricedAssetService _messageBrockerClient;
 
-    public Worker(IServiceScopeFactory scope, ILogger<Worker> logger, IConfigurationRoot configuration)
+    public Worker(IServiceScopeFactory scope, ILogger<Worker> logger, 
+        IConfigurationRoot configuration, IPricedAssetService messageBrockerClient)
     {
         _assetsServices = scope.CreateScope().ServiceProvider.GetRequiredService<AssetsServices>();
         _logger = logger;
         _configuration = configuration;
+        _messageBrockerClient = messageBrockerClient;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -67,38 +70,13 @@ public class Worker : BackgroundService
          }
          
          var pricedAssets = _assetsServices.LoadPricedAssetsFromAssets(assets);
-         
-         var kafkaProperties = GetKafkaProperties();
-         var messageBrocker = new KafkaClient(
-             kafkaProperties.bootstrapServer,
-             kafkaProperties.topicName,
-             kafkaProperties.partitionsNumber,
-             kafkaProperties.retentionTtlPerHour
-             );
                 
         foreach (var assetPriced in pricedAssets)
         {
             var jsonMessage = System.Text.Json.JsonSerializer.Serialize(assetPriced);
             var byteMessage = System.Text.Encoding.UTF8.GetBytes(jsonMessage);
-                    
-            if(await messageBrocker.PublishAsync(byteMessage))
-                _logger.LogInformation("Message published to topic {topic} - {message}", kafkaProperties.topicName, jsonMessage);
-            else
-                _logger.LogError("Fail to publishMessage, Will be send to cache - {message}", jsonMessage);
-        }
-    }
-    
-    private (string bootstrapServer, string topicName, int partitionsNumber, int retentionTtlPerHour) GetKafkaProperties()
-    {
-        var bootstrapServers 
-            = _configuration["MessageBrocker:Kafka:BootstrapServers"] ?? "localhost:9092";
-        var topic 
-            = _configuration["MessageBrocker:Kafka:Topic"] ?? "asset-price";
-        var partition
-            = Convert.ToInt16(_configuration["MessageBrocker:Kafka:PartitionsNumbers"] ?? "3");
-        var replicationFactor 
-            = Convert.ToInt16(_configuration["MessageBrocker:Kafka:RetentionTtlPerHour"] ?? "1");
 
-        return (bootstrapServers, topic, partition, replicationFactor);
+            await _messageBrockerClient.PublishAsync(byteMessage);
+        }
     }
 }

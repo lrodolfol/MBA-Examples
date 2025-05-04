@@ -12,8 +12,10 @@ public class KafkaClient : IPricedAssetService
     private readonly int _retentionTtlPerHour;
     
     private readonly ProducerConfig _producerConfig;
+    
+    private readonly ILogger<KafkaClient> _logger;
 
-    public KafkaClient(string bootstrapServers, string topic, int partition, int retentionTtlPerHour)
+    public KafkaClient(string bootstrapServers, string topic, int partition, int retentionTtlPerHour, ILogger<KafkaClient> logger)
     {
         _bootstrapServers = bootstrapServers;
         _topic = topic;
@@ -22,8 +24,13 @@ public class KafkaClient : IPricedAssetService
         
         _producerConfig = new ProducerConfig
         {
-            BootstrapServers = bootstrapServers
+            BootstrapServers = bootstrapServers,
+            MessageTimeoutMs = (int)TimeSpan.FromSeconds(5).TotalMilliseconds,
+            Acks = Acks.All,
+            EnableIdempotence = false // mensagens na ordem e certeza de entrega (obrigado usar com acks = true)
         };
+        
+        _logger = logger;
     }
 
     private async Task CreateTopicIfNotExist()
@@ -62,7 +69,7 @@ public class KafkaClient : IPricedAssetService
         return invalid;
     }
 
-    public async Task<bool> PublishAsync(byte[] message)
+    public async Task PublishAsync(byte[] message)
     {
         try
         {
@@ -80,7 +87,13 @@ public class KafkaClient : IPricedAssetService
             
             });   
             
-            return result.Status == PersistenceStatus.Persisted; 
+            if(result.Status == PersistenceStatus.Persisted)
+                _logger.LogInformation(
+                    "Message published to topic {topic}#{partition}@{offset} - {message}",
+                    result.Topic, result.Partition, result.Offset, result.Value
+                    );
+            else
+                _logger.LogError("Fail to publishMessage, Will be send to cache - {message}", result.Value);
         }catch (Exception e)
         {
             throw;

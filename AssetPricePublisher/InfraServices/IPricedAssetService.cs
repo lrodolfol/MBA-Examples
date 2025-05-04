@@ -2,5 +2,5 @@
 
 public interface IPricedAssetService
 {
-    public Task<bool> PublishAsync(byte[] message);
+    public Task PublishAsync(byte[] message);
 }
