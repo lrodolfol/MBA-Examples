@@ -1,0 +1,40 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: asset-price-publisher
+  labels:
+    app: asset-price-publisher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: asset-price-publisher
+  template:
+    metadata:
+      labels:
+        app: asset-price-publisher
+    spec:
+      containers:
+        - name: asset-price-publisher
+          image: asset-price-publisher:1.0
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: asset-price-publisher-service
+spec:
+  selector:
+    app: asset-price-publisher-service
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP              
